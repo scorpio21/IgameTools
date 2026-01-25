@@ -1,0 +1,96 @@
+# IgameToolsWinForms
+
+Aplicación Windows Forms (.NET) para abrir y visualizar `csv/gameslist.csv` (formato IGame) con una interfaz similar a la herramienta original.
+
+## Requisitos
+
+- Visual Studio 2022
+- .NET 8 SDK
+
+## Ejecutar
+
+1. Abre `IgameToolsWinForms/IgameToolsWinForms.csproj` en Visual Studio.
+2. Ejecuta el proyecto.
+
+Al iniciar no carga ningún archivo automáticamente. Usa el botón **Load CSV** para seleccionar un archivo `gameslist.csv`.
+
+## Funcionalidad actual
+
+- **Load CSV**: carga un `gameslist.csv` y muestra columnas `Name`, `Genre`, `Slave`, `Path`.
+- **Short Names**: alterna entre nombre completo y nombre corto (26 caracteres, truncación inteligente en límites de palabras).
+- **Title Case**: previsualiza el texto con `Camel Case`, `lower case` o `UPPER CASE`.
+- **Show Dupes**: filtra para mostrar solo nombres duplicados (se resaltan en rojo).
+- **Show Unknown**: filtra para mostrar solo juegos no encontrados en la Fix List (se muestran en azul).
+- **Save CSV**: guarda el CSV con el mismo formato base del original (sobrescribir o guardar como nuevo) y respeta `Short Names`, `Keep Data` y `Title Case`.
+- **Quick Tag**: añade `(tag)` al final del nombre en los juegos seleccionados.
+- **Undo/Redo**: sistema completo con historial de 50 comandos, atajos Ctrl+Z/Ctrl+Y.
+- **Edición**: doble click sobre un juego para editar `Name`, `Short`, `Slave` y `Genre`.
+- **Fix List**: descarga (si hace falta) el archivo `IG_Data*` y `genres` desde FTP y actualiza `Name/Short/Genre`. Los juegos no encontrados se marcan como `Unknown` (en azul) y se pueden filtrar con **Show Unknown**. Durante el proceso se muestra una ventana de estado y al finalizar presenta un resumen detallado con estadísticas de actualización.
+- **Estadísticas**: panel de estadísticas en tiempo real con información general y de Fix List, capacidad de exportar al portapapeles.
+- **Búsqueda Avanzada**: búsqueda avanzada con múltiples filtros y atajos (Ctrl+F).
+- **Interfaz Responsiva**: layout optimizado sin solapamientos, ajuste automático al redimensionar ventana.
+
+Origen FTP actual: `ftp://ftp.grandis.nu/~Uploads/mrv2k/`.
+
+## Características Técnicas
+
+- **Sistema de Comandos**: Implementación del patrón Command para acciones deshacibles
+- **Validación CSV**: Validación robusta de archivos CSV con detección de errores
+- **FTP Integrado**: Conexión segura con manejo de timeouts y reintentos
+- **Interfaz Responsiva**: Layout optimizado con ajuste dinámico y sin solapamientos
+- **Persistencia**: Guardado automático de preferencias y archivos recientes
+- **Ventanas de Progreso**: Formulario genérico `FormProgreso` con ProgressBar y cancelación para operaciones largas.
+- **Estadísticas en Tiempo Real**: Cálculo y visualización de estadísticas generales y de Fix List
+- **Búsqueda Avanzada**: Sistema de búsqueda con múltiples filtros y expresiones regulares
+
+### Ventanas de Progreso (FormProgreso)
+
+El proyecto incluye un formulario genérico `FormProgreso` para mostrar el progreso de operaciones largas:
+
+- ProgressBar con modo continuo o indeterminado
+- Etiqueta de estado actualizable
+- Botón de cancelar (opcional)
+- Soporte para `CancellationToken` y actualizaciones thread-safe
+
+Uso básico:
+
+```csharp
+using var formProgreso = new FormProgreso("Título operación", permitirCancelar: true);
+formProgreso.Show(this);
+
+for (int i = 0; i <= 100; i += 10)
+{
+    if (formProgreso.Cancelado) break;
+    formProgreso.ActualizarProgreso(i, "Procesando...");
+    await Task.Delay(100);
+}
+formProgreso.Close();
+```
+
+Para probarlo: **Utilidades > Progreso de prueba**.
+
+## Créditos
+
+Esta aplicación está inspirada en la herramienta original **I-Game Tool**.
+
+- Autor original: **Paul Vince (MrV2k)**
+- © 2022 Paul Vince (MrV2k)
+- Referencia: `original/IGame_Tool07a.pb`
+- Web: <https://github.com/MrV2K/IG_Tool>
+
+## Estado Actual
+
+Versión estable con funcionalidad completa. La aplicación incluye todas las características principales de la herramienta original más mejoras adicionales como:
+
+- Interfaz moderna y responsiva
+- Panel de estadísticas en tiempo real
+- Búsqueda avanzada con múltiples filtros
+- Sistema de undo/redo robusto
+- Manejo mejorado de errores
+- Soporte para archivos CSV grandes
+
+## Issues Conocidos
+
+- #20 Diálogos de Confirmación del Original
+- #22 Manejo Mejorado de Errores del Original  
+- #23 Comportamiento UI Exacto del Original

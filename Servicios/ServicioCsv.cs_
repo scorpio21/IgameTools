@@ -1,0 +1,232 @@
+using System.Text;
+using IgameToolsWinForms; // Para usar el CsvValidator original
+
+namespace IgameToolsWinForms.Servicios;
+
+public class ServicioCsv
+{
+    public ServicioCsv()
+    {
+    }
+
+    public (List<Juego> juegos, IgameToolsWinForms.ValidationResult validacion) CargarCsv(string rutaCsv, IProgress<string>? progreso = null)
+    {
+        try
+        {
+            if (!File.Exists(rutaCsv))
+            {
+                return (new List<Juego>(), new IgameToolsWinForms.ValidationResult { IsValid = false, Errors = new List<string> { $"El archivo no existe: {rutaCsv}" } });
+            }
+
+            progreso?.Report($"Validando CSV: {rutaCsv}");
+            var validacion = CsvValidator.Validate(rutaCsv);
+
+            if (!validacion.IsValid)
+            {
+                return (new List<Juego>(), validacion);
+            }
+
+            progreso?.Report("CSV válido, cargando datos...");
+            var juegos = new List<Juego>();
+            var lineas = File.ReadAllLines(rutaCsv);
+
+            for (int i = 0; i < lineas.Length; i++)
+            {
+                var linea = lineas[i].Trim();
+                if (string.IsNullOrWhiteSpace(linea)) continue;
+
+                var campos = linea.Split(';');
+                if (campos.Length >= 5)
+                {
+                    var juego = new Juego
+                    {
+                        Nombre = campos[1]?.Trim() ?? string.Empty,  // El nombre está en el campo 1
+                        Genero = campos[2]?.Trim() ?? string.Empty,  // El género está en el campo 2
+                        Path = campos[3]?.Trim() ?? string.Empty,  // El path está en el campo 3
+                        Slave = ExtractSlaveFromPath(campos[3]?.Trim() ?? string.Empty),  // Extraer slave del path
+                        NombreCorto = GenerarNombreCorto(campos[1]?.Trim() ?? string.Empty, 26),
+                        Dato1 = campos.Length > 4 ? campos[4]?.Trim() ?? string.Empty : string.Empty,
+                        Dato2 = campos.Length > 5 ? campos[5]?.Trim() ?? string.Empty : string.Empty,
+                        Dato3 = campos.Length > 6 ? campos[6]?.Trim() ?? string.Empty : string.Empty,
+                        Dato4 = campos.Length > 7 ? campos[7]?.Trim() ?? string.Empty : string.Empty,
+                        EsDesconocido = false
+                    };
+                    juegos.Add(juego);
+                }
+            }
+
+            progreso?.Report($"CSV cargado: {juegos.Count} juegos");
+            return (juegos, validacion);
+        }
+        catch (Exception ex)
+        {
+            return (new List<Juego>(), new IgameToolsWinForms.ValidationResult { IsValid = false, Errors = new List<string> { $"Error al cargar CSV: {ex.Message}" } });
+        }
+    }
+
+    public async Task<bool> GuardarCsvAsync(string rutaDestino, List<Juego> juegos, bool mantenerDatos, int titleCaseIndex, bool nombresCortos, IProgress<string>? progreso = null)
+    {
+        try
+        {
+            progreso?.Report("Creando backup...");
+
+            // Crear backup si existe el archivo
+            if (File.Exists(rutaDestino))
+            {
+                var rutaBackup = Path.Combine(
+                    Path.GetDirectoryName(rutaDestino) ?? "",
+                    $"{Path.GetFileNameWithoutExtension(rutaDestino)}_backup_{DateTime.Now:yyyyMMdd_HHmmss}{Path.GetExtension(rutaDestino)}"
+                );
+                File.Copy(rutaDestino, rutaBackup, overwrite: true);
+            }
+
+            progreso?.Report("Guardando CSV...");
+
+            using var escritor = new StreamWriter(rutaDestino, false, Encoding.ASCII);
+
+            foreach (var juego in juegos)
+            {
+                var linea = GenerarLineaCsv(juego, mantenerDatos, titleCaseIndex, nombresCortos);
+                await escritor.WriteLineAsync(linea);
+            }
+
+            progreso?.Report($"Se guardaron {juegos.Count} juegos");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            progreso?.Report($"Error al guardar: {ex.Message}");
+            return false;
+        }
+    }
+
+    public List<string> ParsearLineaCsv(string linea, char separador)
+    {
+        var resultado = new List<string>();
+        var sb = new StringBuilder();
+        var dentroDeComillas = false;
+
+        for (var i = 0; i < linea.Length; i++)
+        {
+            var c = linea[i];
+
+            if (c == '"')
+            {
+                if (dentroDeComillas && i + 1 < linea.Length && linea[i + 1] == '"')
+                {
+                    sb.Append('"');
+                    i++;
+                    continue;
+                }
+
+                dentroDeComillas = !dentroDeComillas;
+                continue;
+            }
+
+            if (c == separador && !dentroDeComillas)
+            {
+                resultado.Add(sb.ToString());
+                sb.Clear();
+                continue;
+            }
+
+            sb.Append(c);
+        }
+
+        resultado.Add(sb.ToString());
+        return resultado;
+    }
+
+    public string GenerarLineaCsv(Juego juego, bool mantenerDatos, int titleCaseIndex, bool nombresCortos)
+    {
+        var nombre = nombresCortos && !string.IsNullOrWhiteSpace(juego.NombreCorto)
+            ? juego.NombreCorto
+            : juego.Nombre;
+
+        var genero = juego.Genero;
+        var ruta = juego.Path + juego.Slave;
+
+        var prefijo = $"0;{nombre};{genero};{ruta};";
+
+        prefijo = AplicarTitleCase(prefijo, titleCaseIndex);
+
+        var sb = new StringBuilder();
+        sb.Append(prefijo);
+
+        if (!mantenerDatos)
+        {
+            sb.Append("0;0;0;0");
+        }
+        else
+        {
+            sb.Append(juego.Dato1);
+            sb.Append(';');
+            sb.Append(juego.Dato2);
+            sb.Append(';');
+            sb.Append(juego.Dato3);
+            sb.Append(';');
+            sb.Append(juego.Dato4);
+        }
+
+        return sb.ToString();
+    }
+
+    public string AplicarTitleCase(string texto, int titleCaseIndex)
+    {
+        return titleCaseIndex switch
+        {
+            1 => texto.ToLowerInvariant(),
+            2 => texto.ToUpperInvariant(),
+            _ => texto
+        };
+    }
+
+    public string GenerarNombreCorto(string nombre, int maxLongitud = 26)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+            return string.Empty;
+
+        // Eliminar espacios extra y normalizar
+        nombre = nombre.Trim();
+        
+        // Si ya es corto, retornar tal cual
+        if (nombre.Length <= maxLongitud)
+            return nombre;
+
+        // Buscar el último espacio completo antes del límite
+        var ultimoEspacio = nombre.LastIndexOf(' ', maxLongitud - 1);
+        
+        if (ultimoEspacio > 0)
+        {
+            // Cortar en el último espacio completo
+            return nombre.Substring(0, ultimoEspacio);
+        }
+        else
+        {
+            // Si no hay espacios, cortar en el límite
+            return nombre.Substring(0, maxLongitud);
+        }
+    }
+
+    private string ExtractSlaveFromPath(string path)
+    {
+        try
+        {
+            // Path format: Games:0/1000Miglia/1000Miglia.Slave
+            if (string.IsNullOrWhiteSpace(path))
+                return string.Empty;
+
+            var parts = path.Split('/');
+            if (parts.Length >= 3)
+            {
+                var slaveWithExt = parts.Last();
+                return slaveWithExt; // Devuelve el slave completo con extensión
+            }
+            return string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+}

@@ -1,0 +1,1805 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
+using Microsoft.VisualBasic;
+
+namespace IgameToolsWinForms;
+
+public partial class FormPrincipal : Form
+{
+    private const string Version = "0.1.0";
+
+    private string _textoBusqueda = string.Empty;
+    private int _columnaOrden = 0;
+    private bool _ordenAscendente = true;
+
+    private readonly record struct EstadoFix(string Titulo, string Detalle);
+
+    // Sistema de Undo/Redo
+    internal interface ICommand
+    {
+        string Description { get; }
+        void Execute();
+        void Undo();
+    }
+
+    internal class EditarJuegoCommand : ICommand
+    {
+        private readonly List<Juego> _juegos;
+        private readonly int _indice;
+        private readonly Juego _juegoOriginal;
+        private readonly Juego _juegoNuevo;
+
+        public string Description { get; }
+
+        public EditarJuegoCommand(List<Juego> juegos, int indice, Juego juegoOriginal, Juego juegoNuevo)
+        {
+            _juegos = juegos;
+            _indice = indice;
+            _juegoOriginal = juegoOriginal;
+            _juegoNuevo = juegoNuevo;
+            Description = $"Editar juego: {juegoOriginal.Nombre} → {juegoNuevo.Nombre}";
+        }
+
+        public void Execute()
+        {
+            if (_indice >= 0 && _indice < _juegos.Count)
+            {
+                _juegos[_indice] = _juegoNuevo;
+            }
+        }
+
+        public void Undo()
+        {
+            if (_indice >= 0 && _indice < _juegos.Count)
+            {
+                _juegos[_indice] = _juegoOriginal;
+            }
+        }
+    }
+
+    internal class QuickTagCommand : ICommand
+    {
+        private readonly List<Juego> _juegos;
+        private readonly List<int> _indices;
+        private readonly string _etiqueta;
+        private readonly List<Juego> _juegosOriginales;
+
+        public string Description { get; }
+
+        public QuickTagCommand(List<Juego> juegos, List<int> indices, string etiqueta)
+        {
+            _juegos = juegos;
+            _indices = indices;
+            _etiqueta = etiqueta;
+            _juegosOriginales = indices.Select(i => juegos[i]).ToList();
+            Description = $"Quick Tag: '{etiqueta}' en {_indices.Count} juego(s)";
+        }
+
+        public void Execute()
+        {
+            foreach (var indice in _indices)
+            {
+                if (indice >= 0 && indice < _juegos.Count)
+                {
+                    var juego = _juegos[indice];
+                    _juegos[indice] = juego with { Nombre = $"{juego.Nombre}{_etiqueta}" };
+                }
+            }
+        }
+
+        public void Undo()
+        {
+            for (int i = 0; i < _indices.Count; i++)
+            {
+                var indice = _indices[i];
+                if (indice >= 0 && indice < _juegos.Count)
+                {
+                    _juegos[indice] = _juegosOriginales[i];
+                }
+            }
+        }
+    }
+
+    internal class FixListCommand : ICommand
+    {
+        private readonly List<Juego> _juegos;
+        private readonly List<Juego> _juegosOriginales;
+        private readonly List<Juego> _juegosNuevos;
+
+        public string Description { get; }
+
+        public FixListCommand(List<Juego> juegos, List<Juego> juegosNuevos)
+        {
+            _juegos = juegos;
+            _juegosOriginales = new List<Juego>(juegos);
+            _juegosNuevos = new List<Juego>(juegosNuevos);
+            Description = $"Fix List: {_juegosNuevos.Count} juegos procesados";
+        }
+
+        public void Execute()
+        {
+            _juegos.Clear();
+            _juegos.AddRange(_juegosNuevos);
+        }
+
+        public void Undo()
+        {
+            _juegos.Clear();
+            _juegos.AddRange(_juegosOriginales);
+        }
+    }
+
+    internal class LimpiarListaCommand : ICommand
+    {
+        private readonly List<Juego> _juegos;
+        private readonly List<Juego> _juegosOriginales;
+
+        public string Description { get; }
+
+        public LimpiarListaCommand(List<Juego> juegos)
+        {
+            _juegos = juegos;
+            _juegosOriginales = new List<Juego>(juegos);
+            Description = $"Limpiar lista: {_juegosOriginales.Count} juegos eliminados";
+        }
+
+        public void Execute()
+        {
+            _juegos.Clear();
+        }
+
+        public void Undo()
+        {
+            _juegos.Clear();
+            _juegos.AddRange(_juegosOriginales);
+        }
+    }
+
+    internal class UndoRedoManager
+    {
+        private readonly Stack<ICommand> _undoStack = new();
+        private readonly Stack<ICommand> _redoStack = new();
+        private readonly int _maxHistorySize;
+
+        public UndoRedoManager(int maxHistorySize = 50)
+        {
+            _maxHistorySize = maxHistorySize;
+        }
+
+        public void ExecuteCommand(ICommand command)
+        {
+            command.Execute();
+            _undoStack.Push(command);
+            _redoStack.Clear();
+
+            while (_undoStack.Count > _maxHistorySize)
+            {
+                var items = _undoStack.ToArray();
+                _undoStack.Clear();
+                for (int i = items.Length - 1; i >= Math.Max(0, items.Length - _maxHistorySize); i--)
+                {
+                    _undoStack.Push(items[i]);
+                }
+            }
+        }
+
+        public bool CanUndo => _undoStack.Count > 0;
+        public bool CanRedo => _redoStack.Count > 0;
+
+        public string? UndoDescription => CanUndo ? _undoStack.Peek().Description : null;
+        public string? RedoDescription => CanRedo ? _redoStack.Peek().Description : null;
+
+        public void Undo()
+        {
+            if (!CanUndo) return;
+
+            var command = _undoStack.Pop();
+            command.Undo();
+            _redoStack.Push(command);
+        }
+
+        public void Redo()
+        {
+            if (!CanRedo) return;
+
+            var command = _redoStack.Pop();
+            command.Execute();
+            _undoStack.Push(command);
+        }
+
+        public void Clear()
+        {
+            _undoStack.Clear();
+            _redoStack.Clear();
+        }
+    }
+
+    private sealed class FormEstadoFix : Form
+    {
+        private readonly Label _lblTitulo;
+        private readonly Label _lblDetalle;
+
+        public FormEstadoFix(EstadoFix estadoInicial)
+        {
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Left = 16;
+            Top = 52;
+            Width = 280;
+            Height = 60;
+            Font = new Font(SystemFonts.MessageBoxFont, FontStyle.Bold);
+
+            Controls.Add(_lblTitulo);
+            Controls.Add(_lblDetalle);
+
+            Actualizar(estadoInicial);
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            if (Owner == null)
+            {
+                CenterToScreen();
+                return;
+            }
+
+            var ownerBounds = Owner.Bounds;
+            Left = ownerBounds.Left + (ownerBounds.Width - Width) / 2;
+            Top = ownerBounds.Top + (ownerBounds.Height - Height) / 2;
+        }
+
+        public void Actualizar(EstadoFix estado)
+        {
+            Text = estado.Titulo;
+            _lblTitulo.Text = estado.Titulo;
+            _lblDetalle.Text = estado.Detalle;
+            Refresh();
+        }
+    }
+
+    private sealed class FormAyuda : Form
+    {
+        public FormAyuda(string texto)
+        {
+            Text = "Help";
+            StartPosition = FormStartPosition.CenterParent;
+            Width = 520;
+            Height = 560;
+
+            var editor = new TextBox
+            {
+                Multiline = true,
+                ReadOnly = true,
+                WordWrap = true,
+                ScrollBars = ScrollBars.Vertical,
+                Dock = DockStyle.Fill,
+                Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9f),
+                Text = texto
+            };
+
+            Controls.Add(editor);
+        }
+    }
+    
+    private sealed class CompData
+    {
+        public required string Nombre { get; init; }
+        public required string NombreCorto { get; init; }
+        public required string Genero { get; init; }
+        public string Folder { get; init; } = string.Empty;
+    }
+
+    internal record struct Juego
+    {
+        public required string Nombre { get; init; }
+        public required string Genero { get; set; }
+        public required string Ruta { get; init; }
+        public required string Path { get; init; }
+        public required string Slave { get; init; }
+        public string NombreCorto { get; set; } = string.Empty;
+        public bool EsDesconocido { get; set; }
+
+        public string Dato1 { get; init; } = "0";
+        public string Dato2 { get; init; } = "0";
+        public string Dato3 { get; init; } = "0";
+        public string Dato4 { get; init; } = "0";
+
+        public Juego() { }
+    }
+
+    private readonly List<Juego> _juegos = new();
+    private List<Juego> _juegosUndo = new();
+    private string _rutaCsvActual = string.Empty;
+
+    // TextBox de búsqueda (añadir desde el diseñador)
+    private TextBox? txtBusquedaControl;
+
+    // Settings de la aplicación
+    private AppSettings _settings = new();
+
+    // Gestor de Undo/Redo
+    private readonly UndoRedoManager _undoRedoManager = new();
+
+    public FormPrincipal()
+    {
+        InitializeComponent();
+        
+        // Configurar icono del formulario
+        try
+        {
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "img", "amiga.png");
+            if (File.Exists(iconPath))
+            {
+                // Cargar la imagen como icono del formulario
+                using var bitmap = new Bitmap(iconPath);
+                Icon = System.Drawing.Icon.FromHandle(bitmap.GetHicon());
+            }
+        }
+        catch
+        {
+            // Si no se puede cargar el icono, continuar sin él
+        }
+
+        // Conectar evento ColumnClick para ordenación
+        listaJuegos.ColumnClick += ListaJuegos_ColumnClick;
+    }
+
+    private void TxtBusqueda_TextChanged(object? sender, EventArgs e)
+    {
+        if (sender is TextBox txt)
+        {
+            _textoBusqueda = txt.Text;
+            DibujarLista();
+        }
+    }
+
+    private void ListaJuegos_ColumnClick(object? sender, ColumnClickEventArgs e)
+    {
+        // Si se hace clic en la misma columna, invertir dirección
+        if (_columnaOrden == e.Column)
+        {
+            _ordenAscendente = !_ordenAscendente;
+        }
+        else
+        {
+            _columnaOrden = e.Column;
+            _ordenAscendente = true;
+        }
+
+        DibujarLista();
+    }
+
+    private void FormPrincipal_Load(object sender, EventArgs e)
+    {
+        // Cargar settings
+        _settings = AppSettings.Load();
+
+        // Asignar referencia al TextBox del diseñador
+        txtBusquedaControl = txtBusqueda;
+
+        // Aplicar preferencias guardadas
+        chkMantenerDatos.Checked = _settings.MantenerDatos;
+        chkNombresCortos.Checked = _settings.NombresCortos;
+        chkVerDuplicados.Checked = _settings.VerDuplicados;
+        chkVerDesconocidos.Checked = _settings.VerDesconocidos;
+        cmbTitleCase.SelectedIndex = _settings.TitleCaseIndex;
+
+        // Aplicar tamaño/posición de ventana si está guardado
+        if (_settings.WindowLeft >= 0 && _settings.WindowTop >= 0)
+        {
+            Left = _settings.WindowLeft;
+            Top = _settings.WindowTop;
+        }
+        if (_settings.WindowWidth > 0 && _settings.WindowHeight > 0)
+        {
+            Width = _settings.WindowWidth;
+            Height = _settings.WindowHeight;
+        }
+
+        chkNombresCortos.Enabled = false;
+        chkMantenerDatos.Enabled = false;
+        chkVerDuplicados.Enabled = false;
+        chkVerDesconocidos.Enabled = false;
+        cmbTitleCase.Enabled = false;
+
+        btnArreglarLista.Enabled = false;
+        btnGuardarCsv.Enabled = false;
+        btnEtiquetaRapida.Enabled = false;
+        btnLimpiarLista.Enabled = false;
+        btnDeshacer.Enabled = false;
+
+        // Deshabilitar búsqueda hasta que se cargue una lista
+        if (txtBusquedaControl != null)
+        {
+            txtBusquedaControl.Enabled = false;
+        }
+
+        // Cargar último CSV si existe y está disponible
+        if (!string.IsNullOrWhiteSpace(_settings.LastCsvFile) && File.Exists(_settings.LastCsvFile))
+        {
+            CargarCsv(_settings.LastCsvFile);
+        }
+
+        ActualizarEstadoYTitulo();
+        ActualizarBotones();
+    }
+
+    private void FormPrincipal_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        // Guardar preferencias actuales
+        _settings.MantenerDatos = chkMantenerDatos.Checked;
+        _settings.NombresCortos = chkNombresCortos.Checked;
+        _settings.VerDuplicados = chkVerDuplicados.Checked;
+        _settings.VerDesconocidos = chkVerDesconocidos.Checked;
+        _settings.TitleCaseIndex = cmbTitleCase.SelectedIndex;
+
+        // Guardar tamaño/posición de la ventana (solo si no está minimizado/maximizado)
+        if (WindowState == FormWindowState.Normal)
+        {
+            _settings.WindowLeft = Left;
+            _settings.WindowTop = Top;
+            _settings.WindowWidth = Width;
+            _settings.WindowHeight = Height;
+        }
+
+        _settings.Save();
+    }
+
+    private void btnCargarCsv_Click(object sender, EventArgs e)
+    {
+        using var dialogo = new OpenFileDialog
+        {
+            Title = "Abrir gameslist.csv",
+            Filter = "CSV (*.csv)|*.csv|Todos los archivos (*.*)|*.*",
+            CheckFileExists = true,
+            CheckPathExists = true
+        };
+
+        if (dialogo.ShowDialog(this) == DialogResult.OK)
+        {
+            CargarCsv(dialogo.FileName);
+        }
+    }
+
+    private void CargarCsv(string rutaCsv)
+    {
+        try
+        {
+            // Validar el CSV antes de cargar
+            var validacion = CsvValidator.Validate(rutaCsv);
+            
+            if (!validacion.IsValid)
+            {
+                var mensajeError = $"No se puede cargar el archivo CSV:\n\n{string.Join("\n", validacion.Errors)}";
+                MessageBox.Show(this, mensajeError, "Error de validación CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Mostrar advertencias si las hay
+            if (validacion.Warnings.Any())
+            {
+                var mensajeAdvertencias = $"Advertencias al cargar el CSV:\n\n{string.Join("\n", validacion.Warnings)}\n\n¿Desea continuar?";
+                var resultado = MessageBox.Show(this, mensajeAdvertencias, "Advertencias CSV", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (resultado != DialogResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            _rutaCsvActual = rutaCsv;
+            _juegos.Clear();
+
+            var numeroLinea = 0;
+            foreach (var campos in EnumerarFilasCsv(rutaCsv))
+            {
+                numeroLinea++;
+
+                if (campos.Count < 4)
+                {
+                    continue; // Las líneas con menos de 4 campos ya fueron filtradas por la validación
+                }
+
+                try
+                {
+                    var nombre = ObtenerCampo(campos, 1);
+                    var genero = ObtenerCampo(campos, 2);
+                    var ruta = ObtenerCampo(campos, 3);
+
+                    var dato1 = ObtenerCampo(campos, 4);
+                    var dato2 = ObtenerCampo(campos, 5);
+                    var dato3 = ObtenerCampo(campos, 6);
+                    var dato4 = ObtenerCampo(campos, 7);
+
+                    var slave = ObtenerUltimoSegmentoRuta(ruta);
+                    var path = ObtenerDirectorioRuta(ruta);
+
+                    _juegos.Add(new Juego
+                    {
+                        Nombre = nombre,
+                        Genero = genero,
+                        Ruta = ruta,
+                        Slave = slave,
+                        Path = path,
+                        NombreCorto = GenerarNombreCorto(nombre),
+                        EsDesconocido = false,
+                        Dato1 = dato1,
+                        Dato2 = dato2,
+                        Dato3 = dato3,
+                        Dato4 = dato4
+                    });
+                }
+                catch (Exception ex)
+                {
+                    // Generar debug para esta línea específica
+                    var debugPath = Path.Combine(Path.GetDirectoryName(rutaCsv) ?? "", "debug_cargar_csv.txt");
+                    using var writer = new StreamWriter(debugPath, true, Encoding.UTF8);
+                    writer.WriteLine($"Error en línea {numeroLinea}: {ex.Message}");
+                    writer.WriteLine($"Campos ({campos.Count}): [{string.Join(" | ", campos)}]");
+                    writer.WriteLine();
+                }
+            }
+
+            _juegos.Sort((a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a.Nombre, b.Nombre));
+
+            // Guardar en settings
+            _settings.LastCsvFile = rutaCsv;
+            _settings.AddRecentFile(rutaCsv);
+            _settings.Save();
+
+            // Mostrar resumen de carga
+            var mensajeResumen = $"CSV cargado correctamente:\n" +
+                               $"• Total de líneas: {validacion.TotalLines}\n" +
+                               $"• Juegos válidos: {validacion.ValidLines}\n" +
+                               $"• Líneas ignoradas: {validacion.InvalidLines}";
+            MessageBox.Show(this, mensajeResumen, "CSV cargado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            DibujarLista();
+            ActualizarBotones(); // Habilitar todos los controles cuando hay juegos
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Error al cargar CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void DibujarLista()
+    {
+        // Guardar selección actual
+        Juego? selectedJuego = null;
+        if (listaJuegos.SelectedItems.Count > 0 && listaJuegos.SelectedItems[0].Tag is Juego juego)
+        {
+            selectedJuego = juego;
+        }
+
+        listaJuegos.BeginUpdate();
+        try
+        {
+            listaJuegos.Items.Clear();
+
+            var nombresDuplicados = CalcularNombresDuplicados(_juegos);
+            var juegosParaMostrar = ObtenerJuegosParaMostrar(nombresDuplicados);
+
+            foreach (var juegoItem in juegosParaMostrar)
+            {
+                var nombreAMostrar = chkNombresCortos.Checked ? juegoItem.NombreCorto : juegoItem.Nombre;
+                nombreAMostrar = AplicarTitleCase(nombreAMostrar);
+
+                var item = new ListViewItem(nombreAMostrar);
+                item.SubItems.Add(juegoItem.Genero);
+                item.SubItems.Add(juegoItem.Slave);
+                item.SubItems.Add(juegoItem.Path);
+                item.Tag = juegoItem;
+
+                if (juegoItem.EsDesconocido)
+                {
+                    item.ForeColor = Color.Blue;
+                }
+
+                if (nombresDuplicados.Contains(juegoItem.Nombre))
+                {
+                    item.ForeColor = Color.Red;
+                }
+
+                listaJuegos.Items.Add(item);
+
+                // Restaurar selección si coincide
+                if (selectedJuego.HasValue && juegoItem.Equals(selectedJuego.Value))
+                {
+                    item.Selected = true;
+                    item.EnsureVisible();
+                }
+            }
+
+            // Autoajustar columnas al contenido
+            foreach (ColumnHeader column in listaJuegos.Columns)
+            {
+                column.Width = -1; // -1 = autoajuste al contenido
+            }
+            
+            // Asegurar que la columna de nombre tenga un mínimo de ancho
+            if (listaJuegos.Columns.Count > 0)
+            {
+                listaJuegos.Columns[0].Width = Math.Max(listaJuegos.Columns[0].Width, 200);
+            }
+        }
+        finally
+        {
+            listaJuegos.EndUpdate();
+        }
+
+        ActualizarEstadoYTitulo();
+        ActualizarBotones();
+    }
+
+    private void ActualizarEstadoYTitulo()
+    {
+        var total = _juegos.Count;
+        var mostrados = listaJuegos.Items.Count;
+        Text = $"IGame Tool {Version} (Showing {mostrados} of {total} Games)";
+    }
+
+    private void ActualizarBotones()
+    {
+        var hayLista = _juegos.Count > 0;
+        btnArreglarLista.Enabled = hayLista;
+        btnGuardarCsv.Enabled = hayLista;
+        btnLimpiarLista.Enabled = hayLista;
+        btnEtiquetaRapida.Enabled = listaJuegos.Items.Count > 0;
+        
+        // Habilitar checkboxes y controles relacionados cuando hay juegos
+        chkNombresCortos.Enabled = hayLista;
+        chkMantenerDatos.Enabled = hayLista;
+        chkVerDuplicados.Enabled = hayLista;
+        chkVerDesconocidos.Enabled = hayLista;
+        cmbTitleCase.Enabled = hayLista;
+
+        // Habilitar búsqueda cuando hay juegos
+        if (txtBusquedaControl != null)
+        {
+            txtBusquedaControl.Enabled = hayLista;
+        }
+
+        // Actualizar botón Deshacer con el nuevo gestor
+        btnDeshacer.Enabled = _undoRedoManager.CanUndo;
+        btnDeshacer.Text = _undoRedoManager.CanUndo 
+            ? $"Deshacer: {_undoRedoManager.UndoDescription}" 
+            : "Deshacer";
+    }
+
+    private IEnumerable<Juego> ObtenerJuegosParaMostrar(HashSet<string> nombresDuplicados)
+    {
+        IEnumerable<Juego> query = _juegos;
+
+        if (chkVerDuplicados.Checked)
+        {
+            query = query.Where(j => nombresDuplicados.Contains(j.Nombre));
+        }
+
+        if (chkVerDesconocidos.Checked)
+        {
+            query = query.Where(j => j.EsDesconocido);
+        }
+
+        if (!string.IsNullOrWhiteSpace(_textoBusqueda))
+        {
+            var busqueda = _textoBusqueda.Trim();
+            query = query.Where(j =>
+                j.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                j.NombreCorto.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                j.Genero.Contains(busqueda, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Aplicar ordenación
+        query = _columnaOrden switch
+        {
+            0 => _ordenAscendente ? query.OrderBy(j => j.Nombre, StringComparer.CurrentCultureIgnoreCase) : query.OrderByDescending(j => j.Nombre, StringComparer.CurrentCultureIgnoreCase),
+            1 => _ordenAscendente ? query.OrderBy(j => j.Genero, StringComparer.CurrentCultureIgnoreCase) : query.OrderByDescending(j => j.Genero, StringComparer.CurrentCultureIgnoreCase),
+            2 => _ordenAscendente ? query.OrderBy(j => j.Slave, StringComparer.CurrentCultureIgnoreCase) : query.OrderByDescending(j => j.Slave, StringComparer.CurrentCultureIgnoreCase),
+            3 => _ordenAscendente ? query.OrderBy(j => j.Path, StringComparer.CurrentCultureIgnoreCase) : query.OrderByDescending(j => j.Path, StringComparer.CurrentCultureIgnoreCase),
+            _ => query
+        };
+
+        return query;
+    }
+
+    private HashSet<string> CalcularNombresDuplicados(List<Juego> juegos)
+    {
+        return juegos
+            .GroupBy(j => j.Nombre, StringComparer.CurrentCultureIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToHashSet(StringComparer.CurrentCultureIgnoreCase);
+    }
+
+    private string AplicarTitleCase(string texto)
+    {
+        return cmbTitleCase.SelectedIndex switch
+        {
+            1 => texto.ToLowerInvariant(),
+            2 => texto.ToUpperInvariant(),
+            _ => texto
+        };
+    }
+
+    private void chkNombresCortos_CheckedChanged(object sender, EventArgs e)
+    {
+        if (_juegos.Count == 0)
+        {
+            return;
+        }
+
+        DibujarLista();
+    }
+
+    private void cmbTitleCase_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (_juegos.Count == 0)
+        {
+            return;
+        }
+
+        DibujarLista();
+    }
+
+    private void chkFiltros_CheckedChanged(object sender, EventArgs e)
+    {
+        if (_juegos.Count == 0)
+        {
+            return;
+        }
+
+        DibujarLista();
+    }
+
+    private void btnLimpiarLista_Click(object sender, EventArgs e)
+    {
+        if (_juegos.Count == 0)
+        {
+            return;
+        }
+
+        if (MessageBox.Show(this, "Clear All Data?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+        {
+            return;
+        }
+
+        var comando = new LimpiarListaCommand(_juegos);
+        _undoRedoManager.ExecuteCommand(comando);
+
+        _rutaCsvActual = string.Empty;
+        listaJuegos.Items.Clear();
+
+        chkNombresCortos.Checked = false;
+        chkVerDuplicados.Checked = false;
+        chkVerDesconocidos.Checked = false;
+        cmbTitleCase.SelectedIndex = 0;
+
+        chkNombresCortos.Enabled = false;
+        chkMantenerDatos.Enabled = false;
+        chkVerDuplicados.Enabled = false;
+        chkVerDesconocidos.Enabled = false;
+        cmbTitleCase.Enabled = false;
+
+        btnArreglarLista.Enabled = false;
+        btnGuardarCsv.Enabled = false;
+        btnEtiquetaRapida.Enabled = false;
+        btnLimpiarLista.Enabled = false;
+
+        ActualizarEstadoYTitulo();
+        ActualizarBotones();
+    }
+
+    private void btnDeshacer_Click(object sender, EventArgs e)
+    {
+        if (_undoRedoManager.CanUndo)
+        {
+            _undoRedoManager.Undo();
+            DibujarLista();
+            ActualizarBotones();
+        }
+    }
+
+    private void FormPrincipal_KeyDown(object? sender, KeyEventArgs e)
+    {
+        // Ctrl+Z = Undo, Ctrl+Y = Redo
+        if (e.Control)
+        {
+            if (e.KeyCode == Keys.Z && _undoRedoManager.CanUndo)
+            {
+                _undoRedoManager.Undo();
+                DibujarLista();
+                ActualizarBotones();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Y && _undoRedoManager.CanRedo)
+            {
+                _undoRedoManager.Redo();
+                DibujarLista();
+                ActualizarBotones();
+                e.Handled = true;
+            }
+        }
+    }
+
+    private async void btnArreglarLista_Click(object sender, EventArgs e)
+    {
+        if (_juegos.Count == 0)
+        {
+            return;
+        }
+
+        FormEstadoFix? formEstado = null;
+
+        try
+        {
+            Cursor.Current = Cursors.WaitCursor;
+
+            var juegosEntrada = _juegos.Select(CopiarJuego).ToList();
+
+            var directorioTrabajo = ObtenerDirectorioTrabajo();
+            Directory.CreateDirectory(directorioTrabajo);
+
+            formEstado = new FormEstadoFix(new EstadoFix("Checking database...", ""));
+            formEstado.Show(this);
+            formEstado.BringToFront();
+
+            var progreso = new Progress<EstadoFix>(estado =>
+            {
+                if (formEstado != null && !formEstado.IsDisposed)
+                {
+                    formEstado.Actualizar(estado);
+                }
+            });
+
+            var juegosSalida = await Task.Run(() => EjecutarFixList(directorioTrabajo, juegosEntrada, progreso));
+
+            // Crear y ejecutar comando para deshacer
+            var comando = new FixListCommand(_juegos, juegosSalida);
+            _undoRedoManager.ExecuteCommand(comando);
+
+            DibujarLista();
+
+            if (formEstado != null && !formEstado.IsDisposed)
+            {
+                formEstado.Actualizar(new EstadoFix("Fix List", "Done."));
+                await Task.Delay(500);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Generar archivo de debug del error
+            try
+            {
+                var directorioTrabajo = ObtenerDirectorioTrabajo();
+                var debugPath = Path.Combine(directorioTrabajo, "error_fixlist.txt");
+                
+                using var writer = new StreamWriter(debugPath, false, Encoding.UTF8);
+                writer.WriteLine($"=== ERROR EN FIX LIST - {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+                writer.WriteLine($"Error: {ex.Message}");
+                writer.WriteLine($"StackTrace: {ex.StackTrace}");
+                writer.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+                writer.WriteLine();
+                writer.WriteLine($"Estado actual:");
+                writer.WriteLine($"- Juegos cargados: {_juegos.Count}");
+                writer.WriteLine($"- Directorio trabajo: {directorioTrabajo}");
+                
+                MessageBox.Show(this, $"Error: {ex.Message}\n\nSe ha creado un archivo de debug en:\n{debugPath}", 
+                               "Error en Fix List", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch
+            {
+                MessageBox.Show(this, ex.Message, "Error en Fix List", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        finally
+        {
+            if (formEstado != null && !formEstado.IsDisposed)
+            {
+                formEstado.Close();
+                formEstado.Dispose();
+            }
+
+            Cursor.Current = Cursors.Default;
+        }
+    }
+
+    private List<Juego> EjecutarFixList(string directorioTrabajo, List<Juego> juegosEntrada, IProgress<EstadoFix> progreso)
+    {
+        progreso.Report(new EstadoFix("Checking database...", ""));
+        var rutaDb = DescargarBaseDatosSiHaceFalta(directorioTrabajo, progreso);
+
+        progreso.Report(new EstadoFix("Checking database...", "Checking genres..."));
+        DescargarArchivoGenresSiHaceFalta(directorioTrabajo, progreso);
+
+        progreso.Report(new EstadoFix("Loading database...", Path.GetFileName(rutaDb) ?? string.Empty));
+        var mapa = CargarMapaBaseDatos(rutaDb);
+
+        progreso.Report(new EstadoFix("Fixing list...", $"0 / {juegosEntrada.Count}"));
+        var salida = new List<Juego>(juegosEntrada.Count);
+
+        for (var i = 0; i < juegosEntrada.Count; i++)
+        {
+            var juego = juegosEntrada[i];
+            var key = juego.Slave.ToLowerInvariant();
+
+            if (mapa.TryGetValue(key, out var comp))
+            {
+                salida.Add(new Juego
+                {
+                    Nombre = comp.Nombre,
+                    NombreCorto = comp.NombreCorto,
+                    Genero = comp.Genero,
+                    Ruta = juego.Ruta,
+                    Path = juego.Path,
+                    Slave = juego.Slave,
+                    EsDesconocido = false,
+                    Dato1 = juego.Dato1,
+                    Dato2 = juego.Dato2,
+                    Dato3 = juego.Dato3,
+                    Dato4 = juego.Dato4
+                });
+            }
+            else
+            {
+                salida.Add(new Juego
+                {
+                    Nombre = juego.Nombre,
+                    NombreCorto = string.IsNullOrWhiteSpace(juego.Nombre) ? string.Empty : juego.Nombre,
+                    Genero = "Unknown",
+                    Ruta = juego.Ruta,
+                    Path = juego.Path,
+                    Slave = juego.Slave,
+                    EsDesconocido = true,
+                    Dato1 = juego.Dato1,
+                    Dato2 = juego.Dato2,
+                    Dato3 = juego.Dato3,
+                    Dato4 = juego.Dato4
+                });
+            }
+
+            if (i == 0 || (i + 1) % 50 == 0 || i + 1 == juegosEntrada.Count)
+            {
+                progreso.Report(new EstadoFix("Fixing list...", $"{i + 1} / {juegosEntrada.Count}"));
+            }
+        }
+
+        salida.Sort((a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a.Nombre, b.Nombre));
+        progreso.Report(new EstadoFix("Fix List", "Done."));
+        return salida;
+    }
+
+    private void btnGuardarCsv_Click(object sender, EventArgs e)
+    {
+        if (_juegos.Count == 0)
+        {
+            return;
+        }
+
+        var rutaDestino = ObtenerRutaDestinoGuardado();
+        if (string.IsNullOrWhiteSpace(rutaDestino))
+        {
+            return;
+        }
+
+        try
+        {
+            // Backup automático si el archivo ya existe
+            if (File.Exists(rutaDestino))
+            {
+                var directorio = Path.GetDirectoryName(rutaDestino);
+                var nombre = Path.GetFileNameWithoutExtension(rutaDestino);
+                var extension = Path.GetExtension(rutaDestino);
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var rutaBackup = Path.Combine(directorio ?? "", $"{nombre}_{timestamp}{extension}");
+                File.Copy(rutaDestino, rutaBackup, overwrite: true);
+            }
+
+            using var escritor = new StreamWriter(rutaDestino, false, Encoding.ASCII);
+
+            foreach (var juego in _juegos)
+            {
+                var nombre = chkNombresCortos.Checked && !string.IsNullOrWhiteSpace(juego.NombreCorto)
+                    ? juego.NombreCorto
+                    : juego.Nombre;
+
+                var genero = juego.Genero;
+                var prefijo = $"0;{nombre};{genero};";
+
+                if (cmbTitleCase.SelectedIndex == 1)
+                {
+                    prefijo = prefijo.ToLowerInvariant();
+                }
+                else if (cmbTitleCase.SelectedIndex == 2)
+                {
+                    prefijo = prefijo.ToUpperInvariant();
+                }
+
+                var ruta = juego.Path + juego.Slave;
+
+                var sb = new StringBuilder();
+                sb.Append(prefijo);
+                sb.Append(ruta);
+                sb.Append(';');
+
+                if (!chkMantenerDatos.Checked)
+                {
+                    sb.Append("0;0;0;0");
+                }
+                else
+                {
+                    sb.Append(juego.Dato1);
+                    sb.Append(';');
+                    sb.Append(juego.Dato2);
+                    sb.Append(';');
+                    sb.Append(juego.Dato3);
+                    sb.Append(';');
+                    sb.Append(juego.Dato4);
+                }
+
+                escritor.WriteLine(sb.ToString());
+            }
+
+            MessageBox.Show(this, "CSV guardado.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Error al guardar CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void btnEtiquetaRapida_Click(object sender, EventArgs e)
+    {
+        if (_juegos.Count == 0)
+        {
+            return;
+        }
+
+        if (listaJuegos.SelectedItems.Count == 0)
+        {
+            MessageBox.Show(this, "Selecciona uno o varios juegos en la lista.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        var tag = Interaction.InputBox("Enter a new tag", "Add Tag", "");
+        if (string.IsNullOrWhiteSpace(tag))
+        {
+            return;
+        }
+
+        // Obtener índices de los juegos seleccionados
+        var indices = new List<int>();
+        foreach (ListViewItem item in listaJuegos.SelectedItems)
+        {
+            if (item.Tag is Juego juego)
+            {
+                var indice = _juegos.IndexOf(juego);
+                if (indice >= 0)
+                {
+                    indices.Add(indice);
+                }
+            }
+        }
+
+        if (indices.Count == 0)
+        {
+            return;
+        }
+
+        // Crear y ejecutar comando
+        var comando = new QuickTagCommand(_juegos, indices, $" ({tag.Trim()})");
+        _undoRedoManager.ExecuteCommand(comando);
+
+        _juegos.Sort((a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a.Nombre, b.Nombre));
+        DibujarLista();
+        ActualizarBotones();
+    }
+
+    private void btnAyuda_Click(object sender, EventArgs e)
+    {
+        using var form = new FormAyuda(ObtenerTextoAyuda());
+        form.ShowDialog(this);
+    }
+
+    private static string ObtenerTextoAyuda()
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine("*** ADVERTENCIA ***");
+        sb.AppendLine();
+        sb.AppendLine("IgameTools solo soporta listas de juegos basadas en CSV.");
+        sb.AppendLine("La lista correcta normalmente se llama 'gameslist.csv'.");
+        sb.AppendLine("Si tu lista no termina en '.csv', puede que estés usando una versión antigua de IGame.");
+        sb.AppendLine();
+
+        sb.AppendLine("*** Acerca de ***");
+        sb.AppendLine();
+        sb.AppendLine("IgameTools es una utilidad que usa una base de datos para mejorar nombres y añadir géneros a listas de IGame.");
+        sb.AppendLine("No es perfecta: puede haber duplicados y algunas entradas pueden quedar como 'Unknown'.");
+        sb.AppendLine();
+
+        sb.AppendLine("*** Instrucciones ***");
+        sb.AppendLine();
+        sb.AppendLine("1. Copia el archivo gameslist.csv desde tu Amiga (IGame) a tu PC. Recomendación: haz un backup.");
+        sb.AppendLine("2. Pulsa 'Cargar CSV' para abrir tu lista.");
+        sb.AppendLine("3. Pulsa 'Fix List' para actualizar nombres y géneros usando IG_Data.dat y el archivo genres.");
+        sb.AppendLine("4. Realiza cambios adicionales si lo necesitas.");
+        sb.AppendLine("5. Pulsa 'Guardar CSV' para guardar el resultado (puedes sobrescribir o guardar como nuevo).");
+        sb.AppendLine();
+
+        sb.AppendLine("*** Lista de Juegos ***");
+        sb.AppendLine();
+        sb.AppendLine("Los duplicados se resaltan en rojo.");
+        sb.AppendLine("Los desconocidos se resaltan en azul (se marcan tras ejecutar 'Fix List').");
+        sb.AppendLine();
+
+        sb.AppendLine("*** Edición ***");
+        sb.AppendLine();
+        sb.AppendLine("Para editar un juego, haz doble clic en la lista y modifica Nombre/Corto/Slave/Género.");
+        sb.AppendLine("'Etiqueta Rápida' añade una etiqueta al final del nombre para una o varias entradas seleccionadas.");
+        sb.AppendLine("'Deshacer' revierte el último cambio.");
+        sb.AppendLine();
+
+        sb.AppendLine("*** Base de Datos ***");
+        sb.AppendLine();
+        sb.AppendLine("'Mantener Datos' mantiene los datos de juego (play data) del CSV original.");
+        sb.AppendLine("'Nombres Cortos' usa el nombre corto (26 caracteres) cuando está disponible.");
+        sb.AppendLine();
+
+        sb.AppendLine("*** Filtros ***");
+        sb.AppendLine();
+        sb.AppendLine("'Ver Duplicados' filtra y muestra solo duplicados.");
+        sb.AppendLine("'Ver Desconocidos' filtra y muestra solo entradas desconocidas.");
+        sb.AppendLine("'Title Case' define el formato de mayúsculas/minúsculas al guardar.");
+
+        return sb.ToString();
+    }
+
+    private void listaJuegos_DoubleClick(object sender, EventArgs e)
+    {
+        if (listaJuegos.SelectedItems.Count != 1)
+        {
+            return;
+        }
+
+        if (listaJuegos.SelectedItems[0].Tag is not Juego juego)
+        {
+            return;
+        }
+
+        var generos = ObtenerGenerosParaEditor();
+
+        using var editor = new FormEditarJuego(
+            juego.Nombre,
+            juego.NombreCorto,
+            juego.Slave,
+            juego.Genero,
+            generos);
+
+        if (editor.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        GuardarUndo();
+
+        var indice = _juegos.IndexOf(juego);
+        if (indice < 0)
+        {
+            return;
+        }
+
+        var nombreNuevo = editor.NombreEditado;
+        var generoNuevo = editor.GeneroEditado;
+        var slaveNuevo = editor.SlaveEditado;
+        var nombreCortoNuevo = string.IsNullOrWhiteSpace(editor.NombreCortoEditado)
+            ? GenerarNombreCorto(nombreNuevo)
+            : editor.NombreCortoEditado;
+
+        _juegos[indice] = new Juego
+        {
+            Nombre = nombreNuevo,
+            Genero = generoNuevo,
+            Ruta = juego.Ruta,
+            Path = juego.Path,
+            Slave = slaveNuevo,
+            NombreCorto = nombreCortoNuevo,
+            EsDesconocido = juego.EsDesconocido,
+            Dato1 = juego.Dato1,
+            Dato2 = juego.Dato2,
+            Dato3 = juego.Dato3,
+            Dato4 = juego.Dato4
+        };
+
+        _juegos.Sort((a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a.Nombre, b.Nombre));
+        DibujarLista();
+    }
+
+    private static Juego CopiarJuego(Juego j)
+    {
+        return new Juego
+        {
+            Nombre = j.Nombre,
+            Genero = j.Genero,
+            Ruta = j.Ruta,
+            Path = j.Path,
+            Slave = j.Slave,
+            NombreCorto = j.NombreCorto,
+            EsDesconocido = j.EsDesconocido,
+            Dato1 = j.Dato1,
+            Dato2 = j.Dato2,
+            Dato3 = j.Dato3,
+            Dato4 = j.Dato4
+        };
+    }
+
+    private void GuardarUndo()
+    {
+        _juegosUndo = _juegos.Select(CopiarJuego).ToList();
+        btnDeshacer.Enabled = true;
+    }
+
+    private List<string> ObtenerGenerosParaEditor()
+    {
+        var generos = new List<string>();
+
+        var rutaGeneros = ObtenerRutaArchivoGeneros();
+        if (!string.IsNullOrWhiteSpace(rutaGeneros) && File.Exists(rutaGeneros))
+        {
+            try
+            {
+                generos.AddRange(File.ReadAllLines(rutaGeneros, Encoding.UTF8)
+                    .Select(l => l.Trim())
+                    .Where(l => !string.IsNullOrWhiteSpace(l)));
+            }
+            catch
+            {
+            }
+        }
+
+        if (generos.Count == 0)
+        {
+            generos.AddRange(_juegos
+                .Select(j => j.Genero)
+                .Where(g => !string.IsNullOrWhiteSpace(g))
+                .Distinct(StringComparer.CurrentCultureIgnoreCase)
+                .OrderBy(g => g, StringComparer.CurrentCultureIgnoreCase));
+        }
+
+        return generos;
+    }
+
+    private string ObtenerDirectorioTrabajo()
+    {
+        if (!string.IsNullOrWhiteSpace(_rutaCsvActual))
+        {
+            var dir = Path.GetDirectoryName(_rutaCsvActual);
+            if (!string.IsNullOrWhiteSpace(dir))
+            {
+                return dir;
+            }
+        }
+
+        var baseDir = AppContext.BaseDirectory;
+        return Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", ".."));
+    }
+
+    private string DescargarBaseDatosSiHaceFalta(string directorioTrabajo, IProgress<EstadoFix>? progreso = null)
+    {
+        var dbLocal = Directory
+            .EnumerateFiles(directorioTrabajo, "IG_Data*", SearchOption.TopDirectoryOnly)
+            .Select(Path.GetFileName)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .ToList();
+
+        var dbActualLocal = dbLocal.Count > 0 ? dbLocal[0]! : string.Empty;
+
+        progreso?.Report(new EstadoFix("Checking database...", "Connecting to FTP..."));
+        var remoto = ObtenerNombreBaseDatosRemota(progreso);
+        if (string.IsNullOrWhiteSpace(remoto))
+        {
+            if (string.IsNullOrWhiteSpace(dbActualLocal))
+            {
+                throw new InvalidOperationException("No se pudo localizar la base de datos IG_Data (ni local ni remota).");
+            }
+
+            return Path.Combine(directorioTrabajo, dbActualLocal);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dbActualLocal) && string.Equals(dbActualLocal, remoto, StringComparison.OrdinalIgnoreCase))
+        {
+            progreso?.Report(new EstadoFix("Checking database...", "Data file up to date."));
+            Thread.Sleep(500);
+            return Path.Combine(directorioTrabajo, dbActualLocal);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dbActualLocal))
+        {
+            var rutaVieja = Path.Combine(directorioTrabajo, dbActualLocal);
+            if (File.Exists(rutaVieja))
+            {
+                File.Delete(rutaVieja);
+            }
+        }
+
+        var rutaNueva = Path.Combine(directorioTrabajo, remoto);
+        progreso?.Report(new EstadoFix("Checking database...", "Downloading data file."));
+        DescargarFtp(remoto, rutaNueva, progreso);
+        return rutaNueva;
+    }
+
+    private void DescargarArchivoGenresSiHaceFalta(string directorioTrabajo, IProgress<EstadoFix>? progreso = null)
+    {
+        var ruta = Path.Combine(directorioTrabajo, "genres");
+        if (File.Exists(ruta))
+        {
+            return;
+        }
+
+        // Intentar descargar genres, pero si no existe, crearlo desde IG_Data.dat
+        try
+        {
+            progreso?.Report(new EstadoFix("Checking database...", "Downloading genres..."));
+            DescargarFtp("genres", ruta, progreso);
+        }
+        catch
+        {
+            // Si no se puede descargar genres, crearlo desde IG_Data.dat
+            var rutaIGData = Path.Combine(directorioTrabajo, "IG_Data.dat");
+            if (File.Exists(rutaIGData))
+            {
+                CrearArchivoGenresDesdeIGData(rutaIGData, ruta);
+            }
+        }
+    }
+
+    private void CrearArchivoGenresDesdeIGData(string rutaIGData, string rutaGenres)
+    {
+        try
+        {
+            var generos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            
+            foreach (var linea in File.ReadLines(rutaIGData, Encoding.ASCII))
+            {
+                if (string.IsNullOrWhiteSpace(linea))
+                {
+                    continue;
+                }
+
+                var campos = ParsearLineaCsv(linea, ';');
+                if (campos.Count >= 3)
+                {
+                    var genero = ObtenerCampo(campos, 2);
+                    if (!string.IsNullOrWhiteSpace(genero))
+                    {
+                        generos.Add(genero.Trim());
+                    }
+                }
+            }
+
+            // Guardar géneros únicos ordenados
+            using var writer = new StreamWriter(rutaGenres, false, Encoding.UTF8);
+            foreach (var genero in generos.OrderBy(g => g, StringComparer.CurrentCultureIgnoreCase))
+            {
+                writer.WriteLine(genero);
+            }
+        }
+        catch
+        {
+            // Si no se puede crear el archivo genres, continuar sin él
+            // No es crítico para el funcionamiento de Fix List
+        }
+    }
+
+    private string? ObtenerNombreBaseDatosRemota(IProgress<EstadoFix>? progreso = null)
+    {
+        try
+        {
+            var archivos = ListarFtp("", progreso);
+            progreso?.Report(new EstadoFix("Checking database...", "Connected to FTP"));
+            
+            // Debug: guardar lista de archivos encontrados
+            var debugPath = Path.Combine(ObtenerDirectorioTrabajo(), "debug_ftp_files.txt");
+            using var writer = new StreamWriter(debugPath, false, Encoding.UTF8);
+            writer.WriteLine($"=== ARCHIVOS FTP ENCONTRADOS - {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+            writer.WriteLine($"Total archivos: {archivos.Count}");
+            writer.WriteLine();
+            
+            foreach (var archivo in archivos)
+            {
+                writer.WriteLine(archivo);
+            }
+            
+            writer.WriteLine();
+            writer.WriteLine("=== BÚSQUEDA DE IG_Data ===");
+            
+            // Buscar cualquier archivo que contenga "IG_Data" en el nombre
+            var archivoDb = archivos.FirstOrDefault(a => a.Contains("IG_Data", StringComparison.OrdinalIgnoreCase));
+            
+            if (string.IsNullOrWhiteSpace(archivoDb))
+            {
+                writer.WriteLine("No se encontró ningún archivo que contenga 'IG_Data'");
+            }
+            else
+            {
+                writer.WriteLine($"Archivo encontrado: {archivoDb}");
+            }
+            
+            return archivoDb;
+        }
+        catch (Exception ex)
+        {
+            var debugPath = Path.Combine(ObtenerDirectorioTrabajo(), "debug_ftp_error.txt");
+            using var writer = new StreamWriter(debugPath, false, Encoding.UTF8);
+            writer.WriteLine($"ERROR AL LISTAR FTP: {ex.Message}");
+            writer.WriteLine($"StackTrace: {ex.StackTrace}");
+            return null;
+        }
+    }
+
+    private List<string> ListarFtp(string rutaRelativa, IProgress<EstadoFix>? progreso = null)
+    {
+        var request = CrearRequestFtp(rutaRelativa);
+        request.Method = WebRequestMethods.Ftp.ListDirectory;
+
+        using var response = (FtpWebResponse)request.GetResponse();
+        using var stream = response.GetResponseStream();
+        if (stream == null)
+        {
+            return new List<string>();
+        }
+
+        using var reader = new StreamReader(stream, Encoding.ASCII);
+        var contenido = reader.ReadToEnd();
+
+        return contenido
+            .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(l => l.Trim())
+            .Where(l => !string.IsNullOrWhiteSpace(l))
+            .ToList();
+    }
+
+    private void DescargarFtp(string rutaRelativa, string rutaDestino, IProgress<EstadoFix>? progreso = null)
+    {
+        var request = CrearRequestFtp(rutaRelativa);
+        request.Method = WebRequestMethods.Ftp.DownloadFile;
+
+        using var response = (FtpWebResponse)request.GetResponse();
+        using var stream = response.GetResponseStream();
+        if (stream == null)
+        {
+            throw new InvalidOperationException("No se pudo descargar el archivo desde FTP.");
+        }
+
+        using var salida = File.Create(rutaDestino);
+        stream.CopyTo(salida);
+    }
+
+    private FtpWebRequest CrearRequestFtp(string rutaRelativa)
+    {
+        var baseUri = new Uri("ftp://ftp.grandis.nu/~Uploads/mrv2k/");
+        
+        // Si la ruta relativa está vacía, usamos la URI base directamente
+        Uri uri;
+        if (string.IsNullOrWhiteSpace(rutaRelativa))
+        {
+            uri = baseUri;
+        }
+        else
+        {
+            var relativa = rutaRelativa.TrimStart('/');
+            uri = new Uri(baseUri, relativa);
+        }
+
+        var request = (FtpWebRequest)FtpWebRequest.Create(uri);
+        request.Credentials = new NetworkCredential("ftp", "amiga");
+        request.UsePassive = true;
+        request.UseBinary = true;
+        request.KeepAlive = false;
+        return request;
+    }
+
+    private Dictionary<string, CompData> CargarMapaBaseDatos(string rutaDb)
+    {
+        var mapa = new Dictionary<string, CompData>(StringComparer.OrdinalIgnoreCase);
+        var numeroLinea = 0;
+        var debugPath = Path.Combine(Path.GetDirectoryName(rutaDb) ?? "", "debug_csv.txt");
+
+        try
+        {
+            using var debugWriter = new StreamWriter(debugPath, false, Encoding.UTF8);
+            debugWriter.WriteLine($"=== DEBUG CSV - {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+            debugWriter.WriteLine($"Archivo: {rutaDb}");
+            debugWriter.WriteLine();
+
+            foreach (var linea in File.ReadLines(rutaDb, Encoding.ASCII))
+            {
+                numeroLinea++;
+                
+                if (string.IsNullOrWhiteSpace(linea))
+                {
+                    debugWriter.WriteLine($"Línea {numeroLinea}: [VACÍA]");
+                    continue;
+                }
+
+                try
+                {
+                    var campos = ParsearLineaCsv(linea, ';');
+                    
+                    // Depuración: guardar información de la línea en archivo
+                    if (numeroLinea <= 10 || numeroLinea % 100 == 0 || campos.Count < 5)
+                    {
+                        debugWriter.WriteLine($"Línea {numeroLinea}: {campos.Count} campos");
+                        debugWriter.WriteLine($"Original: {linea}");
+                        debugWriter.WriteLine($"Campos: [{string.Join(" | ", campos)}]");
+                        debugWriter.WriteLine();
+                    }
+                    
+                    // IG_Data.dat tiene 6 campos: Slave;Nombre;Género;NombreCompleto;NombreCorto;Tipo
+                    if (campos.Count < 5)
+                    {
+                        debugWriter.WriteLine($"ERROR: Línea {numeroLinea} - Solo tiene {campos.Count} campos (mínimo 5 requeridos)");
+                        continue;
+                    }
+
+                    var slave = (ObtenerCampo(campos, 0) ?? string.Empty).ToLowerInvariant();
+                    var nombre = ObtenerCampo(campos, 1) ?? string.Empty;
+                    var genero = ObtenerCampo(campos, 2) ?? string.Empty;
+                    var nombreCompleto = ObtenerCampo(campos, 3) ?? string.Empty;
+                    var nombreCorto = ObtenerCampo(campos, 4) ?? string.Empty;
+                    var folder = string.Empty; // IG_Data.dat no tiene folder
+
+                    if (!string.IsNullOrWhiteSpace(slave))
+                    {
+                        mapa[slave] = new CompData
+                        {
+                            Nombre = nombreCompleto, // Usar el nombre completo
+                            NombreCorto = nombreCorto,
+                            Genero = genero,
+                            Folder = folder
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    debugWriter.WriteLine($"ERROR PROCESANDO LÍNEA {numeroLinea}:");
+                    debugWriter.WriteLine($"Línea: {linea}");
+                    debugWriter.WriteLine($"Error: {ex.Message}");
+                    debugWriter.WriteLine($"StackTrace: {ex.StackTrace}");
+                    debugWriter.WriteLine();
+                }
+            }
+
+            debugWriter.WriteLine($"=== RESUMEN ===");
+            debugWriter.WriteLine($"Total líneas procesadas: {numeroLinea}");
+            debugWriter.WriteLine($"Total entradas en mapa: {mapa.Count}");
+        }
+        catch (Exception ex)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() =>
+                    MessageBox.Show($"Error al crear archivo de debug: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)));
+            }
+            else
+            {
+                MessageBox.Show($"Error al crear archivo de debug: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        return mapa;
+    }
+
+    private static string ObtenerFolderDesdePath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return string.Empty;
+        }
+
+        var normalizada = path.Replace('\\', '/').TrimEnd('/');
+
+        var idx = normalizada.LastIndexOf('/');
+        if (idx >= 0 && idx + 1 < normalizada.Length)
+        {
+            return normalizada[(idx + 1)..];
+        }
+
+        idx = normalizada.LastIndexOf(':');
+        if (idx >= 0 && idx + 1 < normalizada.Length)
+        {
+            return normalizada[(idx + 1)..];
+        }
+
+        return normalizada;
+    }
+
+    private string? ObtenerRutaArchivoGeneros()
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(_rutaCsvActual))
+            {
+                var dir = Path.GetDirectoryName(_rutaCsvActual);
+                if (!string.IsNullOrWhiteSpace(dir))
+                {
+                    var ruta = Path.Combine(dir, "genres");
+                    return ruta;
+                }
+            }
+
+            var baseDir = AppContext.BaseDirectory;
+            return Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "genres"));
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private string? ObtenerRutaDestinoGuardado()
+    {
+        if (!string.IsNullOrWhiteSpace(_rutaCsvActual) && File.Exists(_rutaCsvActual))
+        {
+            var respuesta = MessageBox.Show(
+                this,
+                "Overwrite Old Game List?\nSelect 'No' to create a new file.",
+                "Warning",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Warning);
+
+            if (respuesta == DialogResult.Yes)
+            {
+                return AsegurarExtensionCsv(_rutaCsvActual);
+            }
+
+            if (respuesta == DialogResult.Cancel)
+            {
+                return null;
+            }
+        }
+
+        using var dialogo = new SaveFileDialog
+        {
+            Title = "New File",
+            Filter = "CSV (*.csv)|*.csv|Todos los archivos (*.*)|*.*",
+            OverwritePrompt = true,
+            AddExtension = true,
+            DefaultExt = "csv"
+        };
+
+        if (dialogo.ShowDialog(this) != DialogResult.OK)
+        {
+            return null;
+        }
+
+        return AsegurarExtensionCsv(dialogo.FileName);
+    }
+
+    private static string AsegurarExtensionCsv(string ruta)
+    {
+        if (string.Equals(Path.GetExtension(ruta), ".csv", StringComparison.OrdinalIgnoreCase))
+        {
+            return ruta;
+        }
+
+        return ruta + ".csv";
+    }
+
+    private static string ObtenerCampo(IReadOnlyList<string> campos, int indice)
+    {
+        return indice >= 0 && indice < campos.Count ? campos[indice] : string.Empty;
+    }
+
+    private static IEnumerable<List<string>> EnumerarFilasCsv(string rutaCsv)
+    {
+        using var lector = new StreamReader(rutaCsv, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+        string? linea;
+        while ((linea = lector.ReadLine()) != null)
+        {
+            if (string.IsNullOrWhiteSpace(linea))
+            {
+                yield return new List<string>();
+                continue;
+            }
+
+            yield return ParsearLineaCsv(linea, ';');
+        }
+    }
+
+    private static List<string> ParsearLineaCsv(string linea, char separador)
+    {
+        var resultado = new List<string>();
+        var sb = new StringBuilder();
+        var dentroDeComillas = false;
+
+        for (var i = 0; i < linea.Length; i++)
+        {
+            var c = linea[i];
+
+            if (c == '"')
+            {
+                if (dentroDeComillas && i + 1 < linea.Length && linea[i + 1] == '"')
+                {
+                    sb.Append('"');
+                    i++;
+                    continue;
+                }
+
+                dentroDeComillas = !dentroDeComillas;
+                continue;
+            }
+
+            if (c == separador && !dentroDeComillas)
+            {
+                resultado.Add(sb.ToString());
+                sb.Clear();
+                continue;
+            }
+
+            sb.Append(c);
+        }
+
+        resultado.Add(sb.ToString());
+        return resultado;
+    }
+
+    private static string GenerarNombreCorto(string nombre)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            return string.Empty;
+        }
+
+        const int max = 26;
+        return nombre.Length <= max ? nombre : nombre.Substring(0, max);
+    }
+
+    private static string ObtenerUltimoSegmentoRuta(string ruta)
+    {
+        if (string.IsNullOrWhiteSpace(ruta))
+        {
+            return string.Empty;
+        }
+
+        var normalizada = ruta.Replace('\\', '/');
+        var indice = normalizada.LastIndexOf('/');
+        return indice >= 0 && indice + 1 < normalizada.Length ? normalizada[(indice + 1)..] : normalizada;
+    }
+
+    private static string ObtenerDirectorioRuta(string ruta)
+    {
+        if (string.IsNullOrWhiteSpace(ruta))
+        {
+            return string.Empty;
+        }
+
+        var normalizada = ruta.Replace('\\', '/');
+        var indice = normalizada.LastIndexOf('/');
+        return indice >= 0 ? normalizada[..(indice + 1)] : string.Empty;
+    }
+
+    private static string? ObtenerRutaCsvPorDefecto()
+    {
+        try
+        {
+            var baseDir = AppContext.BaseDirectory;
+            var ruta = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "csv", "gameslist.csv"));
+            return ruta;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
