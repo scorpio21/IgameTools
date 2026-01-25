@@ -1204,7 +1204,8 @@ public partial class FormPrincipal : Form
             return;
         }
 
-        using var formProgreso = new FormProgreso("Guardando CSV", permitirCancelar: false);
+        // Mostrar progreso en la interfaz principal
+        MostrarProgresoPrincipal("Iniciando guardado...", indeterminado: false);
         
         var task = Task.Run(() =>
         {
@@ -1231,7 +1232,7 @@ public partial class FormPrincipal : Form
                     var porcentaje = (int)((double)procesados / totalJuegos * 100);
                     this.Invoke(new Action(() =>
                     {
-                        formProgreso.ActualizarProgreso(porcentaje, $"Guardando juego {procesados + 1} de {totalJuegos}...");
+                        ActualizarProgresoPrincipal(porcentaje, $"Guardando juego {procesados + 1} de {totalJuegos}...");
                     }));
 
                     var nombre = chkNombresCortos.Checked && !string.IsNullOrWhiteSpace(juego.NombreCorto)
@@ -1280,7 +1281,7 @@ public partial class FormPrincipal : Form
                 this.Invoke(new Action(() =>
                 {
                     MessageBox.Show(this, "CSV guardado.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    formProgreso.Close();
+                    OcultarProgresoPrincipal();
                 }));
             }
             catch (Exception ex)
@@ -1288,15 +1289,11 @@ public partial class FormPrincipal : Form
                 this.Invoke(new Action(() =>
                 {
                     MessageBox.Show(this, ex.Message, "Error al guardar CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    formProgreso.Close();
+                    OcultarProgresoPrincipal();
                 }));
             }
         });
 
-        // Mostrar progreso mientras guarda
-        formProgreso.ActualizarProgreso(0, "Iniciando guardado...");
-        formProgreso.ShowDialog(this);
-        
         // Esperar a que termine el guardado
         try
         {
@@ -1304,7 +1301,11 @@ public partial class FormPrincipal : Form
         }
         catch (Exception ex)
         {
-            // Ignorar errores de espera
+            // Asegurar que el progreso se oculte incluso si hay error
+            this.Invoke(new Action(() =>
+            {
+                OcultarProgresoPrincipal();
+            }));
         }
     }
 

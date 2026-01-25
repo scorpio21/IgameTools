@@ -39,35 +39,9 @@ Origen FTP actual: `ftp://ftp.grandis.nu/~Uploads/mrv2k/`.
 - **FTP Integrado**: Conexión segura con manejo de timeouts y reintentos
 - **Interfaz Responsiva**: Layout optimizado con ajuste dinámico y sin solapamientos
 - **Persistencia**: Guardado automático de preferencias y archivos recientes
-- **Ventanas de Progreso**: Formulario genérico `FormProgreso` con ProgressBar y cancelación para operaciones largas.
 - **Estadísticas en Tiempo Real**: Cálculo y visualización de estadísticas generales y de Fix List
 - **Búsqueda Avanzada**: Sistema de búsqueda con múltiples filtros y expresiones regulares
-
-### Ventanas de Progreso (FormProgreso)
-
-El proyecto incluye un formulario genérico `FormProgreso` para mostrar el progreso de operaciones largas:
-
-- ProgressBar con modo continuo o indeterminado
-- Etiqueta de estado actualizable
-- Botón de cancelar (opcional)
-- Soporte para `CancellationToken` y actualizaciones thread-safe
-
-Uso básico:
-
-```csharp
-using var formProgreso = new FormProgreso("Título operación", permitirCancelar: true);
-formProgreso.Show(this);
-
-for (int i = 0; i <= 100; i += 10)
-{
-    if (formProgreso.Cancelado) break;
-    formProgreso.ActualizarProgreso(i, "Procesando...");
-    await Task.Delay(100);
-}
-formProgreso.Close();
-```
-
-Para probarlo: **Utilidades > Progreso de prueba**.
+- **Sistema de Progreso Integrado**: Barra de progreso principal para operaciones largas (cargar, guardar, Fix List)
 
 ## Créditos
 
