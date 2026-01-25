@@ -40,7 +40,7 @@ public class ServicioCsv
                 {
                     var fullPath = campos[3]?.Trim() ?? string.Empty;
                     
-                    // Extraer path y filename como el original IGame Tool
+                    // Extraer path y filename con detección de duplicación
                     var pathPart = GetPathPart(fullPath);
                     var filePart = GetFilePart(fullPath);
                     
@@ -48,8 +48,8 @@ public class ServicioCsv
                     {
                         Nombre = campos[1]?.Trim() ?? string.Empty,  // El nombre está en el campo 1
                         Genero = campos[2]?.Trim() ?? string.Empty,  // El género está en el campo 2
-                        Path = pathPart,  // Solo la ruta del directorio como el original
-                        Slave = filePart,  // Solo el nombre del archivo como el original
+                        Path = pathPart,  // Directorio sin duplicación
+                        Slave = filePart,  // Archivo sin duplicación
                         Ruta = string.IsNullOrEmpty(pathPart) ? "" : pathPart + "/",  // Ruta del directorio con /
                         NombreCorto = GenerarNombreCorto(campos[1]?.Trim() ?? string.Empty, 26),
                         Dato1 = campos.Length > 4 ? campos[4]?.Trim() ?? string.Empty : string.Empty,
@@ -222,17 +222,40 @@ public class ServicioCsv
             if (string.IsNullOrWhiteSpace(fullPath))
                 return string.Empty;
 
-            // Reemplazar barras invertidas con barras normales
-            var normalizedPath = fullPath.Replace('\\', '/');
+            // Formato: Games:0/NombreJuegoNombreJuego.Slave
+            // Necesitamos extraer: Games:0/NombreJuego (sin duplicación)
             
-            // Encontrar la última barra
-            var lastSlash = normalizedPath.LastIndexOf('/');
-            if (lastSlash >= 0)
+            // Primero quitar .Slave/.slave del final
+            var slaveIndex = fullPath.IndexOf(".Slave", StringComparison.OrdinalIgnoreCase);
+            if (slaveIndex <= 0)
+                slaveIndex = fullPath.IndexOf(".slave", StringComparison.OrdinalIgnoreCase);
+            
+            if (slaveIndex <= 0)
+                return fullPath;
+            
+            var pathWithoutSlave = fullPath.Substring(0, slaveIndex);
+            
+            // Buscar la última barra para separar el base del nombre duplicado
+            var lastSlash = pathWithoutSlave.LastIndexOf('/');
+            if (lastSlash < 0)
+                return pathWithoutSlave;
+            
+            var pathBase = pathWithoutSlave.Substring(0, lastSlash + 1); // "Games:0/"
+            var duplicatedName = pathWithoutSlave.Substring(lastSlash + 1); // "20000LeaguesUnderTheSea20000LeaguesUnderTheSea"
+            
+            // Intentar encontrar el punto medio donde termina el nombre real
+            var halfLength = duplicatedName.Length / 2;
+            var possibleName = duplicatedName.Substring(0, halfLength);
+            
+            // Verificar si la segunda mitad es una duplicación de la primera
+            var secondHalf = duplicatedName.Substring(halfLength);
+            if (secondHalf.StartsWith(possibleName))
             {
-                return normalizedPath.Substring(0, lastSlash);
+                return pathBase + possibleName;
             }
             
-            return string.Empty;
+            // Si no hay duplicación clara, devolver el path completo sin .Slave
+            return pathWithoutSlave;
         }
         catch
         {
@@ -247,17 +270,40 @@ public class ServicioCsv
             if (string.IsNullOrWhiteSpace(fullPath))
                 return string.Empty;
 
-            // Reemplazar barras invertidas con barras normales
-            var normalizedPath = fullPath.Replace('\\', '/');
+            // Formato: Games:0/NombreJuegoNombreJuego.Slave
+            // Necesitamos extraer: NombreJuego.Slave (sin duplicación)
             
-            // Encontrar la última barra
-            var lastSlash = normalizedPath.LastIndexOf('/');
-            if (lastSlash >= 0)
+            // Buscar la última barra para obtener el nombre del archivo
+            var lastSlash = fullPath.LastIndexOf('/');
+            if (lastSlash < 0)
+                return fullPath;
+            
+            var fileName = fullPath.Substring(lastSlash + 1); // "20000LeaguesUnderTheSea20000LeaguesUnderTheSea.Slave"
+            
+            // Verificar si tiene .Slave/.slave al final
+            var slaveIndex = fileName.IndexOf(".Slave", StringComparison.OrdinalIgnoreCase);
+            if (slaveIndex <= 0)
+                slaveIndex = fileName.IndexOf(".slave", StringComparison.OrdinalIgnoreCase);
+            
+            if (slaveIndex <= 0)
+                return fileName;
+            
+            var nameWithoutSlave = fileName.Substring(0, slaveIndex); // "20000LeaguesUnderTheSea20000LeaguesUnderTheSea"
+            var extension = fileName.Substring(slaveIndex); // ".Slave"
+            
+            // Intentar encontrar duplicación en el nombre
+            var halfLength = nameWithoutSlave.Length / 2;
+            var possibleName = nameWithoutSlave.Substring(0, halfLength);
+            
+            // Verificar si la segunda mitad es una duplicación de la primera
+            var secondHalf = nameWithoutSlave.Substring(halfLength);
+            if (secondHalf.StartsWith(possibleName))
             {
-                return normalizedPath.Substring(lastSlash + 1);
+                return possibleName + extension;
             }
             
-            return fullPath;
+            // Si no hay duplicación clara, devolver el nombre completo
+            return nameWithoutSlave + extension;
         }
         catch
         {
