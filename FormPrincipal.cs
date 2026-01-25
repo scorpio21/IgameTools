@@ -17,7 +17,7 @@ public partial class FormPrincipal : Form
 {
     private static string Version => 
         System.Reflection.Assembly.GetExecutingAssembly()
-            .GetName().Version?.ToString() ?? "0.1.7";
+            .GetName().Version?.ToString() ?? "0.1.8";
 
     private string _textoBusqueda = string.Empty;
     private int _columnaOrden = 0;
