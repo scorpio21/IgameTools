@@ -52,7 +52,7 @@ public class ServicioCsv
                         Genero = campos[2]?.Trim() ?? string.Empty,  // El género está en el campo 2
                         Path = pathPart,  // Solo la ruta del directorio como el original
                         Slave = filePart,  // Solo el nombre del archivo como el original
-                        Ruta = cleanedPath,  // Guardar la ruta limpia para referencia
+                        Ruta = string.IsNullOrEmpty(pathPart) ? "" : pathPart + "/",  // Ruta del directorio con /
                         NombreCorto = GenerarNombreCorto(campos[1]?.Trim() ?? string.Empty, 26),
                         Dato1 = campos.Length > 4 ? campos[4]?.Trim() ?? string.Empty : string.Empty,
                         Dato2 = campos.Length > 5 ? campos[5]?.Trim() ?? string.Empty : string.Empty,
