@@ -1191,7 +1191,7 @@ public partial class FormPrincipal : Form
         return salida;
     }
 
-    private void btnGuardarCsv_Click(object sender, EventArgs e)
+    private async void btnGuardarCsv_Click(object sender, EventArgs e)
     {
         if (_juegos.Count == 0)
         {
@@ -1294,10 +1294,10 @@ public partial class FormPrincipal : Form
             }
         });
 
-        // Esperar a que termine el guardado
+        // Esperar a que termine el guardado de forma asíncrona
         try
         {
-            task.Wait(TimeSpan.FromSeconds(120));
+            await task; // Esperar sin bloquear el UI thread
         }
         catch (Exception ex)
         {
