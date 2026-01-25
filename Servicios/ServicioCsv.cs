@@ -40,11 +40,9 @@ public class ServicioCsv
                 {
                     var fullPath = campos[3]?.Trim() ?? string.Empty;
                     
-                    // CORRECCIÓN: El CSV tiene el Slave duplicado, limpiarlo primero
-                    var cleanedPath = CleanDuplicatedSlave(fullPath);
-                    
-                    var pathPart = GetPathPart(cleanedPath);
-                    var filePart = GetFilePart(cleanedPath);
+                    // Extraer path y filename como el original IGame Tool
+                    var pathPart = GetPathPart(fullPath);
+                    var filePart = GetFilePart(fullPath);
                     
                     var juego = new Juego
                     {
@@ -52,9 +50,7 @@ public class ServicioCsv
                         Genero = campos[2]?.Trim() ?? string.Empty,  // El género está en el campo 2
                         Path = pathPart,  // Solo la ruta del directorio como el original
                         Slave = filePart,  // Solo el nombre del archivo como el original
-                        Ruta = cleanedPath.EndsWith(".slave", StringComparison.OrdinalIgnoreCase) 
-                            ? pathPart + "/" 
-                            : cleanedPath + "/",  // Si no tiene .slave, añadir / al final
+                        Ruta = string.IsNullOrEmpty(pathPart) ? "" : pathPart + "/",  // Ruta del directorio con /
                         NombreCorto = GenerarNombreCorto(campos[1]?.Trim() ?? string.Empty, 26),
                         Dato1 = campos.Length > 4 ? campos[4]?.Trim() ?? string.Empty : string.Empty,
                         Dato2 = campos.Length > 5 ? campos[5]?.Trim() ?? string.Empty : string.Empty,
@@ -219,32 +215,6 @@ public class ServicioCsv
         }
     }
 
-    private string CleanDuplicatedSlave(string fullPath)
-    {
-        if (string.IsNullOrWhiteSpace(fullPath))
-            return string.Empty;
-
-        // El formato es: Games:0/carpeta/archivo.slavearchivo.slavearchivo.slavearchivo.slave
-        // Necesitamos extraer solo la primera parte: Games:0/carpeta/archivo.slave
-        
-        var lastSlashIndex = fullPath.LastIndexOf('/');
-        if (lastSlashIndex < 0)
-            return fullPath;
-
-        var pathPart = fullPath.Substring(0, lastSlashIndex + 1);
-        var fileNamePart = fullPath.Substring(lastSlashIndex + 1);
-        
-        // Buscar el primer ".slave" en el nombre del archivo
-        var firstSlaveIndex = fileNamePart.IndexOf(".slave", StringComparison.OrdinalIgnoreCase);
-        if (firstSlaveIndex > 0)
-        {
-            // Mantener solo hasta el primer .slave
-            fileNamePart = fileNamePart.Substring(0, firstSlaveIndex + 6); // +6 para incluir ".slave"
-        }
-        
-        return pathPart + fileNamePart;
-    }
-
     private string GetPathPart(string fullPath)
     {
         try
@@ -282,7 +252,7 @@ public class ServicioCsv
             
             // Encontrar la última barra
             var lastSlash = normalizedPath.LastIndexOf('/');
-            if (lastSlash >= 0 && lastSlash + 1 < normalizedPath.Length)
+            if (lastSlash >= 0)
             {
                 return normalizedPath.Substring(lastSlash + 1);
             }
