@@ -635,7 +635,7 @@ public partial class FormPrincipal : Form
                 var item = new ListViewItem(nombreAMostrar);
                 item.SubItems.Add(juegoItem.Genero);
                 item.SubItems.Add(juegoItem.Slave);
-                item.SubItems.Add(juegoItem.Path);
+                item.SubItems.Add(juegoItem.Ruta);
                 
                 // Agregar preview con Title Case aplicado
                 var nombreOriginal = chkNombresCortos.Checked ? juegoItem.NombreCorto : juegoItem.Nombre;
