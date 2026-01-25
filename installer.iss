@@ -3,7 +3,7 @@
 
 #define MyAppName "IgameToolsWinForms"
 #ifndef MyAppVersion
- #define MyAppVersion "0.1.7"
+ #define MyAppVersion "0.1.8"
 #endif
 #define MyAppPublisher "scorpio21"
 #define MyAppExeName "IgameToolsWinForms.exe"

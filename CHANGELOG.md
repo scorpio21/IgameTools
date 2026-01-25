@@ -1,23 +1,45 @@
 # Changelog
 
+## v0.1.8 - 2026-01-25
+
+### Corregido
+
+- **Columna Ruta**: Implementado sistema inteligente de detección de duplicación en paths CSV.
+- **Paths Duplicados**: Corregido parsing de rutas tipo "Games:0/NombreJuegoNombreJuego.Slave" para extraer correctamente:
+  - Path: "Games:0/NombreJuego" (sin duplicación)
+  - Slave: "NombreJuego.Slave" (sin duplicación)
+  - Ruta: "Games:0/NombreJuego/" (directorio correcto)
+- **FormProgreso**: Eliminada la ventana de progreso separada, integrada en la barra principal.
+- **UI Responsiva**: Corregidos problemas de solapamiento en el redimensionamiento de la ventana.
+
+### Mejorado
+
+- **Sistema de Progreso**: Integrada la barra de progreso principal para operaciones largas (cargar, guardar, Fix List).
+- **Operaciones Asíncronas**: Convertido el guardado CSV a asíncrono para evitar bloqueos de UI.
+- **Extracción de Paths**: Algoritmo mejorado para detectar y eliminar duplicaciones en nombres de archivos y directorios.
+- **Limpieza de Código**: Removidos mensajes de debug y código de prueba para producción.
+
+### Características Técnicas
+
+- **Detección de Duplicación**: Sistema que identifica cuando un nombre está duplicado y extrae solo la primera mitad.
+- **Compatibilidad**: Maneja tanto ".Slave" como ".slave" en las extensiones de archivo.
+- **Fallback Inteligente**: Si no se detecta duplicación clara, mantiene el nombre completo.
+
 ## v0.1.7 - 2026-01-24
 
 ### Corregido
+
 - **Carga CSV**: Corregido el formato de parsing para manejar correctamente el CSV con ID en primer campo.
 - **Fix List**: Mejorado el procesamiento de IG_Data.dat con extracción correcta de slaves desde el path.
 - **FTP**: Optimizada la conexión con credenciales correctas y manejo de errores mejorado.
 - **Interfaz**: Eliminados archivos de debug para mayor limpieza del entorno.
 
 ### Mejorado
+
 - **Nombres Cortos**: Implementada truncación inteligente en límites de palabras.
 - **Resumen Fix List**: Ventana detallada con estadísticas de actualización y fecha.
 - **Validación**: Sistema de validación CSV más robusto con mensajes claros.
 - **Extracción de Slaves**: Método mejorado para extraer slaves de rutas tipo "Games:0/Juego/Juego.Slave".
-
-### Cambiado
-- El CSV ahora procesa correctamente el formato: ID;Nombre;Género;Path;Slave;Datos...
-- Fix List presenta resumen detallado al finalizar con tasa de actualización y estadísticas.
-- Eliminados archivos de debug temporales para mantener el entorno limpio.
 
 ---
 
