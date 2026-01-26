@@ -2,6 +2,14 @@
 
 Aplicación Windows Forms (.NET) para abrir y visualizar `csv/gameslist.csv` (formato IGame) con una interfaz similar a la herramienta original.
 
+## Capturas
+
+Las capturas se guardan en `img/`.
+
+- **Pantalla principal**
+
+  ![Pantalla principal](img/menu.png)
+
 ## Requisitos
 
 - Visual Studio 2022
