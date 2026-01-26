@@ -1,4 +1,5 @@
 using IgameToolsWinForms;
+using IgameToolsWinForms.Interfaces;
 
 namespace IgameToolsWinForms.Servicios;
 
@@ -15,7 +16,7 @@ public class OrdenamientoJuegos
     public bool Ascendente { get; set; } = true;
 }
 
-public class ServicioJuegos
+public class ServicioJuegos : IServicioJuegos
 {
     public IEnumerable<Juego> AplicarFiltros(List<Juego> juegos, FiltrosJuegos filtros, HashSet<string> nombresDuplicados)
     {
@@ -252,6 +253,56 @@ public class ServicioJuegos
             1 => texto.ToLowerInvariant(),
             2 => texto.ToUpperInvariant(),
             _ => texto
+        };
+    }
+
+    // Métodos para la interfaz
+    public List<Juego> FiltrarJuegos(List<Juego> juegos, string texto, bool mostrarDuplicados, bool mostrarDesconocidos)
+    {
+        var filtros = new FiltrosJuegos
+        {
+            TextoBusqueda = texto,
+            VerDuplicados = mostrarDuplicados,
+            VerDesconocidos = mostrarDesconocidos
+        };
+
+        var nombresDuplicados = juegos
+            .GroupBy(j => j.Nombre.ToLowerInvariant())
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToHashSet();
+
+        return AplicarFiltros(juegos, filtros, nombresDuplicados).ToList();
+    }
+
+    public List<Juego> OrdenarJuegos(List<Juego> juegos, int columna, bool ascendente)
+    {
+        var ordenamiento = new OrdenamientoJuegos
+        {
+            Columna = columna,
+            Ascendente = ascendente
+        };
+
+        return AplicarOrdenamiento(juegos, ordenamiento).ToList();
+    }
+
+    public void QuickTag(List<Juego> juegos, string tag)
+    {
+        var indices = Enumerable.Range(0, juegos.Count).ToList();
+        AplicarQuickTag(juegos, indices, tag);
+    }
+
+    // Método privado para ordenamiento
+    private IEnumerable<Juego> AplicarOrdenamiento(List<Juego> juegos, OrdenamientoJuegos ordenamiento)
+    {
+        return ordenamiento.Columna switch
+        {
+            0 => ordenamiento.Ascendente ? juegos.OrderBy(j => j.Nombre) : juegos.OrderByDescending(j => j.Nombre),
+            1 => ordenamiento.Ascendente ? juegos.OrderBy(j => j.Genero) : juegos.OrderByDescending(j => j.Genero),
+            2 => ordenamiento.Ascendente ? juegos.OrderBy(j => j.Slave) : juegos.OrderByDescending(j => j.Slave),
+            3 => ordenamiento.Ascendente ? juegos.OrderBy(j => j.Path) : juegos.OrderByDescending(j => j.Path),
+            4 => ordenamiento.Ascendente ? juegos.OrderBy(j => j.NombreCorto) : juegos.OrderByDescending(j => j.NombreCorto),
+            _ => juegos
         };
     }
 }

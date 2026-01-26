@@ -2,6 +2,8 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using IgameToolsWinForms;
+using IgameToolsWinForms.Interfaces;
+using IgameToolsWinForms.Modelos;
 using System.IO.Compression;
 
 namespace IgameToolsWinForms.Servicios;
@@ -19,7 +21,7 @@ public class EstadoFix
     }
 }
 
-public class ServicioFixList
+public class ServicioFixList : IServicioFixList
 {
     private readonly string _ftpHost = "ftp.grandis.nu";
     private readonly string _ftpPath = "/~Uploads/mrv2k/";
@@ -579,5 +581,93 @@ public class ServicioFixList
         {
             return string.Empty;
         }
+    }
+
+    // Métodos asíncronos para la interfaz
+    public async Task<(bool exito, string mensaje, EstadisticasFixList estadisticas)> ActualizarDesdeFixListAsync(List<Juego> juegos, IProgress<string>? progreso = null)
+    {
+        try
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
+            var progressFix = new Progress<EstadoFix>(estado =>
+            {
+                progreso?.Report($"{estado.Titulo} - {estado.Detalle}");
+            });
+
+            var juegosActualizados = await EjecutarFixListAsync(Directory.GetCurrentDirectory(), juegos, progressFix);
+            stopwatch.Stop();
+
+            var estadisticas = new EstadisticasFixList
+            {
+                TotalJuegosProcesados = juegos.Count,
+                JuegosActualizados = juegosActualizados.Count,
+                DirectorioTrabajo = Directory.GetCurrentDirectory(),
+                FechaEjecucion = DateTime.Now,
+                DuracionProceso = stopwatch.Elapsed
+            };
+
+            return (true, "Fix List completado exitosamente", estadisticas);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error: {ex.Message}", new EstadisticasFixList());
+        }
+    }
+
+    // Métodos síncronos para compatibilidad
+    public (bool exito, string mensaje) ProbarConexionFtp()
+    {
+        try
+        {
+            var request = WebRequest.Create($"ftp://{_ftpHost}{_ftpPath}");
+            request.Credentials = new NetworkCredential(_ftpUser, _ftpPass);
+            request.Method = WebRequestMethods.Ftp.ListDirectory;
+            
+            using var response = request.GetResponse();
+            return (true, "Conexión FTP exitosa");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error de conexión: {ex.Message}");
+        }
+    }
+
+    public (bool exito, string mensaje, EstadisticasFixList estadisticas) EjecutarFixList(List<Juego> juegos)
+    {
+        try
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var progressFix = new Progress<EstadoFix>(estado => { });
+            
+            var juegosActualizados = EjecutarFixListAsync(Directory.GetCurrentDirectory(), juegos, progressFix).GetAwaiter().GetResult();
+            stopwatch.Stop();
+
+            var estadisticas = new EstadisticasFixList
+            {
+                TotalJuegosProcesados = juegos.Count,
+                JuegosActualizados = juegosActualizados.Count,
+                DirectorioTrabajo = Directory.GetCurrentDirectory(),
+                FechaEjecucion = DateTime.Now,
+                DuracionProceso = stopwatch.Elapsed
+            };
+
+            return (true, "Fix List completado exitosamente", estadisticas);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error: {ex.Message}", new EstadisticasFixList());
+        }
+    }
+
+    // Métodos asíncronos adicionales para compatibilidad
+    public async Task<(bool exito, string mensaje)> ProbarConexionFtpAsync()
+    {
+        return await Task.Run(() => ProbarConexionFtp());
+    }
+
+    public async Task<(bool exito, string mensaje, EstadisticasFixList estadisticas)> EjecutarFixListAsync(List<Juego> juegos)
+    {
+        return await Task.Run(() => EjecutarFixList(juegos));
     }
 }

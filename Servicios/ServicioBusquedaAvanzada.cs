@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using IgameToolsWinForms.Interfaces;
 
 namespace IgameToolsWinForms.Servicios;
 
-public class ServicioBusquedaAvanzada
+public class ServicioBusquedaAvanzada : IServicioBusquedaAvanzada
 {
     public List<Juego> Buscar(List<Juego> juegos, string campo, string tipo, string termino, bool mayusculas, bool usarRegex)
     {
@@ -195,6 +196,53 @@ public class ServicioBusquedaAvanzada
             PorcentajeEncontrados = totalJuegos > 0 ? (double)totalResultados / totalJuegos * 100 : 0,
             TiempoBusqueda = DateTime.Now
         };
+    }
+
+    // Método para la interfaz
+    public List<Juego> BuscarJuegos(List<Juego> juegos, string nombre, string genero, string slave, string ruta, bool busquedaExacta)
+    {
+        if (juegos == null || juegos.Count == 0)
+            return new List<Juego>();
+
+        IEnumerable<Juego> resultados = juegos;
+
+        // Filtrar por nombre
+        if (!string.IsNullOrWhiteSpace(nombre))
+        {
+            if (busquedaExacta)
+                resultados = resultados.Where(j => j.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase));
+            else
+                resultados = resultados.Where(j => j.Nombre.Contains(nombre, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Filtrar por género
+        if (!string.IsNullOrWhiteSpace(genero))
+        {
+            if (busquedaExacta)
+                resultados = resultados.Where(j => j.Genero.Equals(genero, StringComparison.OrdinalIgnoreCase));
+            else
+                resultados = resultados.Where(j => j.Genero.Contains(genero, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Filtrar por slave
+        if (!string.IsNullOrWhiteSpace(slave))
+        {
+            if (busquedaExacta)
+                resultados = resultados.Where(j => j.Slave.Equals(slave, StringComparison.OrdinalIgnoreCase));
+            else
+                resultados = resultados.Where(j => j.Slave.Contains(slave, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Filtrar por ruta
+        if (!string.IsNullOrWhiteSpace(ruta))
+        {
+            if (busquedaExacta)
+                resultados = resultados.Where(j => j.Path.Equals(ruta, StringComparison.OrdinalIgnoreCase));
+            else
+                resultados = resultados.Where(j => j.Path.Contains(ruta, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return resultados.ToList();
     }
 }
 

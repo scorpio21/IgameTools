@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using IgameToolsWinForms.Modelos;
+using IgameToolsWinForms.Interfaces;
 
 namespace IgameToolsWinForms.Servicios;
 
-public class ServicioEstadisticasFixList
+public class ServicioEstadisticasFixList : IServicioEstadisticasFixList
 {
     public EstadisticasFixList CalcularEstadisticasFixList(
         List<Juego> juegosEntrada, 
@@ -122,5 +123,11 @@ public class ServicioEstadisticasFixList
         texto += $"• Directorio: {estadisticas.DirectorioTrabajo}";
 
         return texto;
+    }
+
+    // Método para la interfaz con firma correcta
+    public EstadisticasFixList CalcularEstadisticasFixList(List<Juego> juegos, List<Juego> juegosActualizados, TimeSpan duracion)
+    {
+        return CalcularEstadisticasFixList(juegos, juegosActualizados, Directory.GetCurrentDirectory(), duracion);
     }
 }

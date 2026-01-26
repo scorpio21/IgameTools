@@ -20,6 +20,10 @@ public interface IServicioFixList
     // Métodos síncronos para compatibilidad temporal
     (bool exito, string mensaje) ProbarConexionFtp();
     (bool exito, string mensaje, EstadisticasFixList estadisticas) EjecutarFixList(List<Juego> juegos);
+    
+    // Métodos asíncronos adicionales para compatibilidad
+    Task<(bool exito, string mensaje)> ProbarConexionFtpAsync();
+    Task<(bool exito, string mensaje, EstadisticasFixList estadisticas)> EjecutarFixListAsync(List<Juego> juegos);
 }
 
 public interface IServicioJuegos

@@ -1054,30 +1054,13 @@ public partial class FormPrincipal : Form
             MostrarProgresoPrincipal("Probando conexión FTP...", indeterminado: true);
 
             // Probar conexión FTP primero
-            var conexionOk = await _servicioFixList.ProbarConexionFtpAsync(new Progress<Servicios.EstadoFix>(estado =>
-            {
-                ActualizarProgresoPrincipal(0, $"{estado.Titulo}: {estado.Detalle}");
-            }));
+            var conexionResult = await _servicioFixList.ProbarConexionFtpAsync();
             
-            if (!conexionOk)
+            if (!conexionResult.exito)
             {
                 OcultarProgresoPrincipal();
                 ActualizarProgresoPrincipal(0, "Error de conexión FTP. Verifique su conexión a internet o firewall.");
                 await Task.Delay(3000);
-                OcultarProgresoPrincipal();
-                return;
-            }
-
-            // Usar el servicio FixList con progreso
-            var juegosSalida = await _servicioFixList.EjecutarFixListAsync(directorioTrabajo, juegosEntrada, new Progress<Servicios.EstadoFix>(estado =>
-            {
-                // Extraer porcentaje del detalle si contiene información de progreso
-                var porcentaje = 0;
-                if (estado.Detalle.Contains("/"))
-                {
-                    var partes = estado.Detalle.Split('/');
-                    if (partes.Length == 2 && int.TryParse(partes[0].Trim(), out var actual) && int.TryParse(partes[1].Trim(), out var total))
-                    {
                         porcentaje = (int)((double)actual / total * 100);
                     }
                 }

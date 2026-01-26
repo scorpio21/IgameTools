@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using IgameToolsWinForms.Modelos;
+using IgameToolsWinForms.Interfaces;
 
 namespace IgameToolsWinForms.Servicios;
 
-public class ServicioEstadisticas
+public class ServicioEstadisticas : IServicioEstadisticas
 {
     public Estadisticas CalcularEstadisticas(List<Juego> juegos)
     {

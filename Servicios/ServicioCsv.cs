@@ -1,9 +1,11 @@
 using System.Text;
 using IgameToolsWinForms; // Para usar el CsvValidator original
+using IgameToolsWinForms.Interfaces;
+using IgameToolsWinForms.Modelos;
 
 namespace IgameToolsWinForms.Servicios;
 
-public class ServicioCsv
+public class ServicioCsv : IServicioCsv
 {
     public ServicioCsv()
     {
@@ -330,6 +332,44 @@ public class ServicioCsv
         catch
         {
             return string.Empty;
+        }
+    }
+
+    // Métodos asíncronos para la interfaz
+    public async Task<(List<Juego> juegos, ValidationResult validacion)> CargarCsvAsync(string ruta, IProgress<string>? progreso = null)
+    {
+        return await Task.Run(() => CargarCsv(ruta, progreso));
+    }
+
+    public async Task<(bool exito, string mensaje)> GuardarCsvAsync(string ruta, List<Juego> juegos, bool mantenerDatos, bool titleCase, bool nombresCortos, IProgress<string>? progreso = null)
+    {
+        try
+        {
+            var resultado = await GuardarCsvAsync(ruta, juegos, mantenerDatos, titleCase ? 1 : 0, nombresCortos, progreso);
+            return (resultado, resultado ? "CSV guardado exitosamente" : "Error al guardar CSV");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error: {ex.Message}");
+        }
+    }
+
+    // Métodos síncronos para compatibilidad
+    public (List<Juego> juegos, ValidationResult validacion) CargarCsv(string ruta)
+    {
+        return CargarCsv(ruta, null);
+    }
+
+    public (bool exito, string mensaje) GuardarCsv(string ruta, List<Juego> juegos, bool mantenerDatos, bool titleCase, bool nombresCortos)
+    {
+        try
+        {
+            var resultado = GuardarCsvAsync(ruta, juegos, mantenerDatos, titleCase ? 1 : 0, nombresCortos, null).GetAwaiter().GetResult();
+            return (resultado, resultado ? "CSV guardado exitosamente" : "Error al guardar CSV");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error: {ex.Message}");
         }
     }
 }
