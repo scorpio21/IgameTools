@@ -325,6 +325,7 @@ public partial class FormPrincipal : Form
     private readonly IServicioEstadisticas _servicioEstadisticas;
     private readonly IServicioEstadisticasFixList _servicioEstadisticasFixList;
     private readonly IServicioBusquedaAvanzada _servicioBusquedaAvanzada;
+    private readonly IServicioUndo _servicioUndo;
 
     public FormPrincipal(IServiceProvider services)
     {
@@ -336,6 +337,7 @@ public partial class FormPrincipal : Form
         _servicioEstadisticas = services.GetRequiredService<IServicioEstadisticas>();
         _servicioEstadisticasFixList = services.GetRequiredService<IServicioEstadisticasFixList>();
         _servicioBusquedaAvanzada = services.GetRequiredService<IServicioBusquedaAvanzada>();
+        _servicioUndo = services.GetRequiredService<IServicioUndo>();
         InitializeComponent();
         
         // Configurar icono del formulario

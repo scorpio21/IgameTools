@@ -1,14 +1,7 @@
 using IgameToolsWinForms;
+using IgameToolsWinForms.Interfaces;
 
 namespace IgameToolsWinForms.Servicios;
-
-// Interfaz para comandos
-public interface ICommand
-{
-    void Execute();
-    void Undo();
-    string Description { get; }
-}
 
 // Comando para edición individual de juegos
 public class EditarJuegoCommand : ICommand
@@ -181,7 +174,7 @@ public class LimpiarListaCommand : ICommand
 }
 
 // Gestor de Undo/Redo
-public class ServicioUndo
+public class ServicioUndo : IServicioUndo
 {
     private readonly Stack<ICommand> _undoStack = new();
     private readonly Stack<ICommand> _redoStack = new();
@@ -192,12 +185,14 @@ public class ServicioUndo
         _maxHistorySize = maxHistorySize;
     }
 
+    public bool PuedeDeshacer => _undoStack.Count > 0;
+    public bool PuedeRehacer => _redoStack.Count > 0;
     public bool CanUndo => _undoStack.Count > 0;
     public bool CanRedo => _redoStack.Count > 0;
     public string UndoDescription => CanUndo ? _undoStack.Peek().Description : "Deshacer";
     public string RedoDescription => CanRedo ? _redoStack.Peek().Description : "Rehacer";
 
-    public void ExecuteCommand(ICommand command)
+    public void EjecutarComando(ICommand command)
     {
         try
         {
@@ -215,6 +210,11 @@ public class ServicioUndo
         {
             throw new InvalidOperationException($"Error al ejecutar comando '{command.Description}': {ex.Message}", ex);
         }
+    }
+
+    public void ExecuteCommand(ICommand command)
+    {
+        EjecutarComando(command);
     }
 
     public void Undo()
@@ -253,6 +253,46 @@ public class ServicioUndo
             _redoStack.Push(command);
             throw new InvalidOperationException($"Error al rehacer '{command.Description}': {ex.Message}", ex);
         }
+    }
+
+    public void Deshacer()
+    {
+        Undo();
+    }
+
+    public void Rehacer()
+    {
+        Redo();
+    }
+
+    public List<string> GetHistorial()
+    {
+        var historial = new List<string>();
+        
+        // Agregar comandos de undo (en orden inverso)
+        foreach (var command in _undoStack.Reverse())
+        {
+            historial.Add($"↶ {command.Description}");
+        }
+        
+        // Agregar separador
+        if (_undoStack.Count > 0 && _redoStack.Count > 0)
+        {
+            historial.Add("---");
+        }
+        
+        // Agregar comandos de redo
+        foreach (var command in _redoStack)
+        {
+            historial.Add($"↷ {command.Description}");
+        }
+        
+        return historial;
+    }
+
+    public void LimpiarHistorial()
+    {
+        ClearHistory();
     }
 
     public void ClearHistory()

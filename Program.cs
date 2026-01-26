@@ -9,13 +9,13 @@ using IgameToolsWinForms.Servicios;
 
 namespace IgameToolsWinForms;
 
-internal static class Program
+internal class Program
 {
     [STAThread]
-    private static async Task Main()
+    private static async Task Main(string[] args)
     {
         // Configurar el host con Dependency Injection
-        var host = CreateHostBuilder().Build();
+        var host = CreateHostBuilder(args).Build();
 
         // Configurar logging
         var logger = host.Services.GetRequiredService<ILogger<Program>>();
@@ -46,7 +46,7 @@ internal static class Program
         }
     }
 
-    private static IHostBuilder CreateHostBuilder()
+    private static IHostBuilder CreateHostBuilder(string[] args)
     {
         return Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration((context, config) =>
@@ -78,6 +78,7 @@ internal static class Program
                 services.AddSingleton<IServicioEstadisticas, ServicioEstadisticas>();
                 services.AddSingleton<IServicioEstadisticasFixList, ServicioEstadisticasFixList>();
                 services.AddSingleton<IServicioBusquedaAvanzada, ServicioBusquedaAvanzada>();
+                services.AddSingleton<IServicioUndo, ServicioUndo>();
 
                 // Registrar servicios de UI (ViewModels)
                 services.AddTransient<FormPrincipal>();
