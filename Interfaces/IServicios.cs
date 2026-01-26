@@ -34,6 +34,7 @@ public interface IServicioJuegos
     
     // Métodos adicionales para compatibilidad temporal
     Juego CopiarJuego(Juego juego);
+    void ActualizarNombresCortos(List<Juego> juegos, int maxLongitud = 31);
 }
 
 public interface IServicioEstadisticas
