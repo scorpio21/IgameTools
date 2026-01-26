@@ -9,7 +9,10 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
 using Microsoft.VisualBasic;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using IgameToolsWinForms.Servicios;
+using IgameToolsWinForms.Interfaces;
 
 namespace IgameToolsWinForms;
 
@@ -313,14 +316,26 @@ public partial class FormPrincipal : Form
     // Settings de la aplicación
     private AppSettings _settings = new();
 
-    // Servicios de negocio
-    private readonly ServicioCsv _servicioCsv = new();
-    private readonly ServicioFixList _servicioFixList = new();
-    private readonly ServicioUndo _servicioUndo = new();
-    private readonly ServicioJuegos _servicioJuegos = new();
+    // Servicios inyectados via Dependency Injection
+    private readonly IServiceProvider _services;
+    private readonly ILogger<FormPrincipal> _logger;
+    private readonly IServicioCsv _servicioCsv;
+    private readonly IServicioFixList _servicioFixList;
+    private readonly IServicioJuegos _servicioJuegos;
+    private readonly IServicioEstadisticas _servicioEstadisticas;
+    private readonly IServicioEstadisticasFixList _servicioEstadisticasFixList;
+    private readonly IServicioBusquedaAvanzada _servicioBusquedaAvanzada;
 
-    public FormPrincipal()
+    public FormPrincipal(IServiceProvider services)
     {
+        _services = services;
+        _logger = services.GetRequiredService<ILogger<FormPrincipal>>();
+        _servicioCsv = services.GetRequiredService<IServicioCsv>();
+        _servicioFixList = services.GetRequiredService<IServicioFixList>();
+        _servicioJuegos = services.GetRequiredService<IServicioJuegos>();
+        _servicioEstadisticas = services.GetRequiredService<IServicioEstadisticas>();
+        _servicioEstadisticasFixList = services.GetRequiredService<IServicioEstadisticasFixList>();
+        _servicioBusquedaAvanzada = services.GetRequiredService<IServicioBusquedaAvanzada>();
         InitializeComponent();
         
         // Configurar icono del formulario
