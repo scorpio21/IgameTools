@@ -12,20 +12,20 @@ public partial class PanelEstadisticasFixList : UserControl
     private EstadisticasFixList _estadisticasActuales = new();
 
     // Controles del panel
-    private GroupBox grpEstadisticasFix;
-    private Label lblTotalProcesados;
-    private Label lblActualizados;
-    private Label lblSinCambios;
-    private Label lblGenerosCorregidos;
-    private Label lblPathsEncontrados;
-    private Label lblPathsCorregidos;
-    private Label lblSlavesEncontrados;
-    private Label lblErroresCorregidos;
-    private Label lblDatosExtra;
-    private Label lblPorcentajeCorregidos;
-    private Label lblDuracion;
-    private Label lblFecha;
-    private Button btnExportar;
+    private GroupBox grpEstadisticasFix = null!;
+    private Label lblTotalProcesados = null!;
+    private Label lblActualizados = null!;
+    private Label lblSinCambios = null!;
+    private Label lblGenerosCorregidos = null!;
+    private Label lblPathsEncontrados = null!;
+    private Label lblPathsCorregidos = null!;
+    private Label lblSlavesEncontrados = null!;
+    private Label lblErroresCorregidos = null!;
+    private Label lblDatosExtra = null!;
+    private Label lblPorcentajeCorregidos = null!;
+    private Label lblDuracion = null!;
+    private Label lblFecha = null!;
+    private Button btnExportar = null!;
 
     public PanelEstadisticasFixList()
     {
@@ -170,7 +170,7 @@ public partial class PanelEstadisticasFixList : UserControl
 
             Visible = true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // En caso de error, ocultar el panel
             Visible = false;

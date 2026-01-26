@@ -2,17 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Drawing;
-using Microsoft.VisualBasic;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using IgameToolsWinForms.Servicios;
+using System.Text.RegularExpressions;
 using IgameToolsWinForms.Interfaces;
+using IgameToolsWinForms.Modelos;
+using IgameToolsWinForms.Servicios;
+using IgameToolsWinForms.Controles;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 namespace IgameToolsWinForms;
 
@@ -538,87 +539,118 @@ public partial class FormPrincipal : Form
 
     private void btnCargarCsv_Click(object sender, EventArgs e)
     {
-        using var dialogo = new OpenFileDialog
+        try
         {
-            Title = "Abrir gameslist.csv",
-            Filter = "CSV (*.csv)|*.csv|Todos los archivos (*.*)|*.*",
-            CheckFileExists = true,
-            CheckPathExists = true
-        };
-
-        if (dialogo.ShowDialog(this) == DialogResult.OK)
+            // PRUEBA: Log inmediato para verificar que funciona
+            EscribirDebugLog("=== BOTÓN CARGAR CSV PRESIONADO ===");
+            System.Diagnostics.Debug.WriteLine("=== BOTÓN CARGAR CSV PRESIONADO ===");
+            
+            EscribirDebugLog("btnCargarCsv_Click INICIADO");
+            System.Diagnostics.Debug.WriteLine("btnCargarCsv_Click INICIADO");
+            
+            // SOLUCIÓN: Usar formulario visual diseñado en Visual Studio
+            EscribirDebugLog("Usando formulario visual FormDialogoCargarCsv");
+            System.Diagnostics.Debug.WriteLine("Usando formulario visual FormDialogoCargarCsv");
+            
+            using var dialogo = new FormDialogoCargarCsv();
+            
+            EscribirDebugLog("Mostrando formulario visual");
+            System.Diagnostics.Debug.WriteLine("Mostrando formulario visual");
+            
+            if (dialogo.ShowDialog(this) == DialogResult.OK)
+            {
+                var rutaCsv = dialogo.RutaSeleccionada;
+                EscribirDebugLog($"Ruta seleccionada: {rutaCsv}");
+                System.Diagnostics.Debug.WriteLine($"Ruta seleccionada: {rutaCsv}");
+                
+                CargarCsv(rutaCsv);
+            }
+            else
+            {
+                EscribirDebugLog("Usuario canceló la operación");
+                System.Diagnostics.Debug.WriteLine("Usuario canceló la operación");
+            }
+        }
+        catch (Exception ex)
         {
-            CargarCsv(dialogo.FileName);
+            EscribirDebugLog($"ERROR en btnCargarCsv_Click: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"ERROR en btnCargarCsv_Click: {ex.Message}");
+            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
     private void CargarCsv(string rutaCsv)
     {
-        var task = Task.Run(() =>
+        // Log inmediato para saber si se ejecuta el método
+        EscribirDebugLog($"MÉTODO CargarCsv INICIADO: {rutaCsv}");
+        System.Diagnostics.Debug.WriteLine($"MÉTODO CargarCsv INICIADO: {rutaCsv}");
+        
+        try
         {
-            try
-            {
-                // Mostrar progreso en la interfaz principal
-                MostrarProgresoPrincipal("Cargando archivo CSV...", indeterminado: true);
-                
-                // Usar el servicio CSV de forma síncrona
-                var (juegos, validacion) = _servicioCsv.CargarCsv(rutaCsv);
-                
-                // Actualizar UI en el hilo principal
-                this.Invoke(new Action(() =>
-                {
-                    if (!validacion.IsValid)
-                    {
-                        OcultarProgresoPrincipal();
-                        var mensajeError = $"No se puede cargar el archivo CSV:\n\n{string.Join("\n", validacion.Errors)}";
-                        MessageBox.Show(this, mensajeError, "Error de validación CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    // Mostrar advertencias si las hay
-                    if (validacion.Warnings.Any())
-                    {
-                        OcultarProgresoPrincipal();
-                        var mensajeAdvertencias = $"Advertencias al cargar el CSV:\n\n{string.Join("\n", validacion.Warnings)}\n\n¿Desea continuar?";
-                        var resultado = MessageBox.Show(this, mensajeAdvertencias, "Advertencias CSV", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                        if (resultado != DialogResult.Yes)
-                        {
-                            return;
-                        }
-                        MostrarProgresoPrincipal("Continuando carga del CSV...", indeterminado: true);
-                    }
-
-                    _rutaCsvActual = rutaCsv;
-                    _juegos.Clear();
-                    _juegos.AddRange(juegos);
-
-                    // Limpiar panel de estadísticas Fix List al cargar nuevo CSV
-                    panelEstadisticasFix.Limpiar();
-
-                    // Guardar en settings
-                    _settings.LastCsvFile = rutaCsv;
-                    _settings.AddRecentFile(rutaCsv);
-                    _settings.Save();
-
-                    // Validar versión de IGame
-                    ValidarVersionIGame(rutaCsv, juegos);
-
-                    // Ocultar progreso
-                    OcultarProgresoPrincipal();
-
-                    DibujarLista();
-                    ActualizarBotones();
-                }));
-            }
-            catch (Exception ex)
-            {
-                this.Invoke(new Action(() =>
-                {
-                    OcultarProgresoPrincipal();
-                    MessageBox.Show(this, ex.Message, "Error al cargar CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }));
-            }
-        });
+            EscribirDebugLog("Iniciando carga de CSV síncrona (sin Task.Run)");
+            System.Diagnostics.Debug.WriteLine("Iniciando carga de CSV síncrona (sin Task.Run)");
+            
+            // Mostrar progreso en la interfaz principal
+            EscribirDebugLog("ANTES de MostrarProgresoPrincipal");
+            MostrarProgresoPrincipal("Cargando archivo CSV...", indeterminado: true);
+            EscribirDebugLog("DESPUÉS de MostrarProgresoPrincipal");
+            
+            // Usar el servicio CSV de forma síncrona directamente
+            EscribirDebugLog("ANTES de _servicioCsv.CargarCsv");
+            var (juegos, validacion) = _servicioCsv.CargarCsv(rutaCsv);
+            EscribirDebugLog($"DESPUÉS de _servicioCsv.CargarCsv: {juegos.Count} juegos, Válido: {validacion.IsValid}");
+            
+            // Actualizar datos directamente sin Invoke
+            EscribirDebugLog("ANTES de actualizar _juegos");
+            _rutaCsvActual = rutaCsv;
+            _juegos.Clear();
+            _juegos.AddRange(juegos);
+            EscribirDebugLog("DESPUÉS de actualizar _juegos");
+            
+            // Limpiar panel de estadísticas Fix List al cargar nuevo CSV
+            EscribirDebugLog("ANTES de panelEstadisticasFix.Limpiar");
+            panelEstadisticasFix.Limpiar();
+            EscribirDebugLog("DESPUÉS de panelEstadisticasFix.Limpiar");
+            
+            // Guardar en settings
+            EscribirDebugLog("ANTES de guardar settings");
+            _settings.LastCsvFile = rutaCsv;
+            _settings.AddRecentFile(rutaCsv);
+            _settings.Save();
+            EscribirDebugLog("DESPUÉS de guardar settings");
+            
+            // Validar versión de IGame
+            EscribirDebugLog("ANTES de ValidarVersionIGame");
+            ValidarVersionIGame(rutaCsv, juegos);
+            EscribirDebugLog("DESPUÉS de ValidarVersionIGame");
+            
+            // Ocultar progreso
+            EscribirDebugLog("ANTES de OcultarProgresoPrincipal");
+            OcultarProgresoPrincipal();
+            EscribirDebugLog("DESPUÉS de OcultarProgresoPrincipal");
+            
+            // Actualizar UI
+            EscribirDebugLog("ANTES de DibujarLista");
+            DibujarLista();
+            EscribirDebugLog("DESPUÉS de DibujarLista");
+            
+            EscribirDebugLog("ANTES de ActualizarBotones");
+            ActualizarBotones();
+            EscribirDebugLog("DESPUÉS de ActualizarBotones");
+            
+            EscribirDebugLog("ANTES de ActualizarEstadisticas");
+            ActualizarEstadisticas();
+            EscribirDebugLog("DESPUÉS de ActualizarEstadisticas");
+            
+            EscribirDebugLog("CSV cargado exitosamente");
+        }
+        catch (Exception ex)
+        {
+            EscribirDebugLog($"ERROR en CargarCsv: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"ERROR en CargarCsv: {ex.Message}");
+            OcultarProgresoPrincipal();
+            MessageBox.Show(this, ex.Message, "Error al cargar CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private void DibujarLista()
@@ -644,9 +676,15 @@ public partial class FormPrincipal : Form
                 nombreAMostrar = AplicarTitleCase(nombreAMostrar);
 
                 // Debug temporal para nombres cortos
-                if (chkNombresCortos.Checked && !string.IsNullOrEmpty(juegoItem.NombreCorto) && juegoItem.NombreCorto != juegoItem.Nombre)
+                if (chkNombresCortos.Checked)
                 {
-                    System.Diagnostics.Debug.WriteLine($"NOMBRE CORTO: '{juegoItem.Nombre}' -> '{juegoItem.NombreCorto}'");
+                    System.Diagnostics.Debug.WriteLine($"DEBUG NOMBRES CORTOS:");
+                    System.Diagnostics.Debug.WriteLine($"  Nombre completo: '{juegoItem.Nombre}' (longitud: {juegoItem.Nombre.Length})");
+                    System.Diagnostics.Debug.WriteLine($"  Nombre corto: '{juegoItem.NombreCorto}' (longitud: {juegoItem.NombreCorto.Length})");
+                    System.Diagnostics.Debug.WriteLine($"  Nombre a mostrar: '{nombreAMostrar}' (longitud: {nombreAMostrar.Length})");
+                    System.Diagnostics.Debug.WriteLine($"  Son iguales: {juegoItem.Nombre == juegoItem.NombreCorto}");
+                    System.Diagnostics.Debug.WriteLine($"  Nombre corto vacío: {string.IsNullOrEmpty(juegoItem.NombreCorto)}");
+                    System.Diagnostics.Debug.WriteLine("---");
                 }
 
                 var item = new ListViewItem(nombreAMostrar);
@@ -707,19 +745,50 @@ public partial class FormPrincipal : Form
     {
         try
         {
+            var mensaje = $"Actualizando estadísticas con {_juegos.Count} juegos";
+            System.Diagnostics.Debug.WriteLine(mensaje);
+            EscribirDebugLog(mensaje);
+            
             panelEstadisticas.ActualizarEstadisticas(_juegos);
+            
+            var mensajeExito = "Estadísticas actualizadas exitosamente";
+            System.Diagnostics.Debug.WriteLine(mensajeExito);
+            EscribirDebugLog(mensajeExito);
         }
         catch (Exception ex)
         {
-            // Silenciar errores de estadísticas para no interrumpir el flujo principal
-            System.Diagnostics.Debug.WriteLine($"Error al actualizar estadísticas: {ex.Message}");
+            var mensajeError = $"Error al actualizar estadísticas: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine(mensajeError);
+            EscribirDebugLog(mensajeError);
         }
     }
 
-    private void listaJuegos_ColumnWidthChanging(object? sender, ColumnWidthChangingEventArgs e)
+    private void EscribirDebugLog(string mensaje)
     {
-        // Guardar el ancho de las columnas cuando el usuario las ajusta
-        GuardarAnchoColumnas();
+        try
+        {
+            // Crear el log en la raíz del proyecto (ruta absoluta)
+            var logPath = @"d:\xampp\htdocs\IgameTools\DebugLog.txt";
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var lineaLog = $"[{timestamp}] {mensaje}{Environment.NewLine}";
+            
+            // Asegurar que el directorio exista
+            var logDir = Path.GetDirectoryName(logPath);
+            if (!Directory.Exists(logDir))
+            {
+                Directory.CreateDirectory(logDir);
+            }
+            
+            File.AppendAllText(logPath, lineaLog);
+            
+            // También escribir en Debug para consola
+            System.Diagnostics.Debug.WriteLine($"[{timestamp}] {mensaje}");
+        }
+        catch
+        {
+            // Si falla el logging, no interrumpir la aplicación
+            System.Diagnostics.Debug.WriteLine($"ERROR al escribir log: {mensaje}");
+        }
     }
 
     private void listaJuegos_ColumnWidthChanged(object? sender, ColumnWidthChangedEventArgs e)
@@ -924,7 +993,25 @@ public partial class FormPrincipal : Form
             return;
         }
 
-        DibujarLista();
+        if (chkNombresCortos.Checked)
+        {
+            _servicioJuegos.ActualizarNombresCortos(_juegos, 31);
+        }
+
+        // Forzar actualización completa
+        listaJuegos.BeginUpdate();
+        try
+        {
+            DibujarLista();
+        }
+        finally
+        {
+            listaJuegos.EndUpdate();
+        }
+        
+        // Forzar refresh del control
+        listaJuegos.Refresh();
+        this.Refresh();
     }
 
     private void cmbTitleCase_SelectedIndexChanged(object sender, EventArgs e)
@@ -1061,17 +1148,20 @@ public partial class FormPrincipal : Form
                 OcultarProgresoPrincipal();
                 ActualizarProgresoPrincipal(0, "Error de conexión FTP. Verifique su conexión a internet o firewall.");
                 await Task.Delay(3000);
-                        porcentaje = (int)((double)actual / total * 100);
-                    }
-                }
-                
-                ActualizarProgresoPrincipal(porcentaje, $"{estado.Titulo}: {estado.Detalle}");
+                OcultarProgresoPrincipal();
+                return;
+            }
+
+            // Usar el servicio FixList con progreso
+            var fixListResult = await _servicioFixList.ActualizarDesdeFixListAsync(juegosEntrada, new Progress<string>(mensaje =>
+            {
+                ActualizarProgresoPrincipal(0, mensaje);
             }));
 
             var duracion = DateTime.Now - tiempoInicio;
 
             // Crear y ejecutar comando para deshacer
-            var comando = new Servicios.FixListCommand(_juegos, juegosSalida);
+            var comando = new Servicios.FixListCommand(_juegos, fixListResult.estadisticas.TotalJuegosProcesados > 0 ? _juegos : new List<Juego>());
             _servicioUndo.ExecuteCommand(comando);
 
             DibujarLista();
@@ -1080,7 +1170,7 @@ public partial class FormPrincipal : Form
             ActualizarEstadisticas();
             
             // Actualizar panel de estadísticas Fix List
-            panelEstadisticasFix.ActualizarEstadisticas(juegosEntrada, juegosSalida, directorioTrabajo, duracion);
+            panelEstadisticasFix.ActualizarEstadisticas(juegosEntrada, _juegos, directorioTrabajo, duracion);
 
             ActualizarProgresoPrincipal(100, "Fix List completado exitosamente.");
             await Task.Delay(1000);
@@ -1150,7 +1240,7 @@ public partial class FormPrincipal : Form
                 salida.Add(new Juego
                 {
                     Nombre = comp.Nombre,
-                    NombreCorto = comp.NombreCorto,
+                    NombreCorto = string.IsNullOrWhiteSpace(comp.NombreCorto) ? GenerarNombreCorto(comp.Nombre) : comp.NombreCorto,
                     Genero = comp.Genero,
                     Ruta = string.IsNullOrEmpty(juego.Path) ? "" : juego.Path + "/",
                     Path = juego.Path,
@@ -1167,7 +1257,7 @@ public partial class FormPrincipal : Form
                 salida.Add(new Juego
                 {
                     Nombre = juego.Nombre,
-                    NombreCorto = string.IsNullOrWhiteSpace(juego.Nombre) ? string.Empty : juego.Nombre,
+                    NombreCorto = GenerarNombreCorto(juego.Nombre),
                     Genero = "Unknown",
                     Ruta = string.IsNullOrEmpty(juego.Path) ? "" : juego.Path + "/",
                     Path = juego.Path,
@@ -1299,7 +1389,7 @@ public partial class FormPrincipal : Form
         {
             await task; // Esperar sin bloquear el UI thread
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Asegurar que el progreso se oculte incluso si hay error
             this.Invoke(new Action(() =>
@@ -1396,6 +1486,7 @@ public partial class FormPrincipal : Form
         {
             // En modo silencioso, ignorar errores y continuar sin cargar
             // Podríamos loggear el error si quisiéramos
+            Console.WriteLine(ex.Message);
         }
     }
 
@@ -1871,12 +1962,15 @@ public partial class FormPrincipal : Form
             uri = new Uri(baseUri, relativa);
         }
 
+        // Suprimir advertencia SYSLIB0014 - FTP requiere WebRequest, HttpClient no soporta FTP
+#pragma warning disable SYSLIB0014
         var request = (FtpWebRequest)FtpWebRequest.Create(uri);
         request.Credentials = new NetworkCredential("ftp", "amiga");
         request.UsePassive = true;
         request.UseBinary = true;
         request.KeepAlive = false;
         return request;
+#pragma warning restore SYSLIB0014
     }
 
     private Dictionary<string, CompData> CargarMapaBaseDatos(string rutaDb)
@@ -2048,24 +2142,40 @@ public partial class FormPrincipal : Form
         // Si no hay archivo actual, mostrar diálogo directamente
         return MostrarDialogoNuevoArchivo();
     }
-
     private string? MostrarDialogoNuevoArchivo()
     {
-        using var dialogo = new SaveFileDialog
+        try
         {
-            Title = "New File",
-            Filter = "CSV File (*.csv)|*.csv",
-            OverwritePrompt = true,
-            AddExtension = true,
-            DefaultExt = "csv"
-        };
-
-        if (dialogo.ShowDialog(this) != DialogResult.OK)
+            EscribirDebugLog("Mostrando formulario visual para guardar archivo");
+            System.Diagnostics.Debug.WriteLine("Mostrando formulario visual para guardar archivo");
+            
+            using var dialogo = new FormDialogoGuardarCsv();
+            
+            EscribirDebugLog("Mostrando formulario visual de guardar");
+            System.Diagnostics.Debug.WriteLine("Mostrando formulario visual de guardar");
+            
+            if (dialogo.ShowDialog(this) == DialogResult.OK)
+            {
+                var rutaCompleta = dialogo.RutaSeleccionada;
+                EscribirDebugLog($"Ruta de guardado seleccionada: {rutaCompleta}");
+                System.Diagnostics.Debug.WriteLine($"Ruta de guardado seleccionada: {rutaCompleta}");
+                
+                return rutaCompleta;
+            }
+            else
+            {
+                EscribirDebugLog("Usuario canceló el guardado");
+                System.Diagnostics.Debug.WriteLine("Usuario canceló el guardado");
+                return null;
+            }
+        }
+        catch (Exception ex)
         {
+            EscribirDebugLog($"ERROR en MostrarDialogoNuevoArchivo: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"ERROR en MostrarDialogoNuevoArchivo: {ex.Message}");
+            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return null;
         }
-
-        return AsegurarExtensionCsv(dialogo.FileName);
     }
 
     private static string AsegurarExtensionCsv(string ruta)
@@ -2143,8 +2253,36 @@ public partial class FormPrincipal : Form
             return string.Empty;
         }
 
-        const int max = 26;
-        return nombre.Length <= max ? nombre : nombre.Substring(0, max);
+        const int max = 31;
+        nombre = nombre.Trim();
+        
+        // Si el nombre ya es corto, devolverlo tal como está
+        if (nombre.Length <= max)
+        {
+            return nombre;
+        }
+        
+        // Si justo en el límite hay un espacio, no estamos rompiendo palabra.
+        // En ese caso, mantener el máximo (y luego limpiar espacios finales).
+        if (max < nombre.Length && nombre[max] == ' ')
+        {
+            return nombre.Substring(0, max).TrimEnd();
+        }
+
+        // Si se rompe una palabra, buscar el último espacio completo antes del límite
+        var ultimoEspacio = nombre.LastIndexOf(' ', max - 1);
+        var nombreCorto = ultimoEspacio > 0
+            ? nombre.Substring(0, ultimoEspacio)
+            : nombre.Substring(0, max).TrimEnd();
+        
+        // Debug mejorado para verificar que funciona
+        System.Diagnostics.Debug.WriteLine($"NOMBRE CORTO GENERADO:");
+        System.Diagnostics.Debug.WriteLine($"  Original: '{nombre}' (longitud: {nombre.Length})");
+        System.Diagnostics.Debug.WriteLine($"  Corto:   '{nombreCorto}' (longitud: {nombreCorto.Length})");
+        System.Diagnostics.Debug.WriteLine($"  Esperado: '{nombre.Substring(0, Math.Min(31, nombre.Length))}'");
+        System.Diagnostics.Debug.WriteLine("---");
+        
+        return nombreCorto;
     }
 
     private static string ObtenerUltimoSegmentoRuta(string ruta)

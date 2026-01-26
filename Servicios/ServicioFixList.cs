@@ -5,6 +5,11 @@ using IgameToolsWinForms;
 using IgameToolsWinForms.Interfaces;
 using IgameToolsWinForms.Modelos;
 using System.IO.Compression;
+using System.Net.Http;
+
+// Suprimir advertencias SYSLIB0014 para FTP - WebRequest es la API correcta para FTP
+// HttpClient no tiene soporte nativo para FTP en .NET
+#pragma warning disable SYSLIB0014
 
 namespace IgameToolsWinForms.Servicios;
 
@@ -620,9 +625,12 @@ public class ServicioFixList : IServicioFixList
     {
         try
         {
+            // Para FTP, WebRequest sigue siendo la API más directa en .NET
+            // HttpClient no tiene soporte nativo para FTP
             var request = WebRequest.Create($"ftp://{_ftpHost}{_ftpPath}");
             request.Credentials = new NetworkCredential(_ftpUser, _ftpPass);
             request.Method = WebRequestMethods.Ftp.ListDirectory;
+            request.Timeout = 10000; // 10 segundos timeout
             
             using var response = request.GetResponse();
             return (true, "Conexión FTP exitosa");
@@ -671,3 +679,5 @@ public class ServicioFixList : IServicioFixList
         return await Task.Run(() => EjecutarFixList(juegos));
     }
 }
+
+#pragma warning restore SYSLIB0014

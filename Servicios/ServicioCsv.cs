@@ -53,7 +53,7 @@ public class ServicioCsv : IServicioCsv
                         Path = pathPart,  // Directorio sin duplicación
                         Slave = filePart,  // Archivo sin duplicación
                         Ruta = string.IsNullOrEmpty(pathPart) ? "" : pathPart + "/",  // Ruta del directorio con /
-                        NombreCorto = GenerarNombreCorto(campos[1]?.Trim() ?? string.Empty, 26),
+                        NombreCorto = GenerarNombreCorto(campos[1]?.Trim() ?? string.Empty, 31),
                         Dato1 = campos.Length > 4 ? campos[4]?.Trim() ?? string.Empty : string.Empty,
                         Dato2 = campos.Length > 5 ? campos[5]?.Trim() ?? string.Empty : string.Empty,
                         Dato3 = campos.Length > 6 ? campos[6]?.Trim() ?? string.Empty : string.Empty,
@@ -190,7 +190,7 @@ public class ServicioCsv : IServicioCsv
         };
     }
 
-    public string GenerarNombreCorto(string nombre, int maxLongitud = 26)
+    public string GenerarNombreCorto(string nombre, int maxLongitud = 31)
     {
         if (string.IsNullOrWhiteSpace(nombre))
             return string.Empty;
@@ -202,7 +202,14 @@ public class ServicioCsv : IServicioCsv
         if (nombre.Length <= maxLongitud)
             return nombre;
 
-        // Buscar el último espacio completo antes del límite
+        // Si justo en el límite hay un espacio, no estamos rompiendo palabra.
+        // En ese caso, mantener el máximo (y luego limpiar espacios finales).
+        if (maxLongitud < nombre.Length && nombre[maxLongitud] == ' ')
+        {
+            return nombre.Substring(0, maxLongitud).TrimEnd();
+        }
+
+        // Si se rompe una palabra, buscar el último espacio completo antes del límite
         var ultimoEspacio = nombre.LastIndexOf(' ', maxLongitud - 1);
         
         if (ultimoEspacio > 0)
@@ -213,7 +220,7 @@ public class ServicioCsv : IServicioCsv
         else
         {
             // Si no hay espacios, cortar en el límite
-            return nombre.Substring(0, maxLongitud);
+            return nombre.Substring(0, maxLongitud).TrimEnd();
         }
     }
 

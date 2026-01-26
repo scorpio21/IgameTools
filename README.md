@@ -25,7 +25,7 @@ Al iniciar no carga ningún archivo automáticamente. Usa el botón **Load CSV**
 ## Funcionalidad actual
 
 - **Load CSV**: carga un `gameslist.csv` y muestra columnas `Name`, `Genre`, `Slave`, `Path`.
-- **Short Names**: alterna entre nombre completo y nombre corto (26 caracteres, truncación inteligente en límites de palabras).
+- **Short Names**: alterna entre nombre completo y nombre corto (31 caracteres, truncación inteligente en límites de palabras).
 - **Title Case**: previsualiza el texto con `Camel Case`, `lower case` o `UPPER CASE`.
 - **Show Dupes**: filtra para mostrar solo nombres duplicados (se resaltan en rojo).
 - **Show Unknown**: filtra para mostrar solo juegos no encontrados en la Fix List (se muestran en azul).

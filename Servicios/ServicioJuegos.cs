@@ -201,7 +201,7 @@ public class ServicioJuegos : IServicioJuegos
         return (total, mostrados, duplicados, desconocidos);
     }
 
-    public void ActualizarNombresCortos(List<Juego> juegos, int maxLongitud = 30)
+    public void ActualizarNombresCortos(List<Juego> juegos, int maxLongitud = 31)
     {
         for (int i = 0; i < juegos.Count; i++)
         {
@@ -215,9 +215,22 @@ public class ServicioJuegos : IServicioJuegos
             var nombreNormalizado = juego.Nombre.Trim();
             
             // Si ya es corto, mantener tal cual
-            var nombreCorto = nombreNormalizado.Length <= maxLongitud 
-                ? nombreNormalizado 
-                : nombreNormalizado.Substring(0, maxLongitud);
+            string nombreCorto;
+            if (nombreNormalizado.Length <= maxLongitud)
+            {
+                nombreCorto = nombreNormalizado;
+            }
+            else if (maxLongitud < nombreNormalizado.Length && nombreNormalizado[maxLongitud] == ' ')
+            {
+                nombreCorto = nombreNormalizado.Substring(0, maxLongitud).TrimEnd();
+            }
+            else
+            {
+                var ultimoEspacio = nombreNormalizado.LastIndexOf(' ', maxLongitud - 1);
+                nombreCorto = ultimoEspacio > 0
+                    ? nombreNormalizado.Substring(0, ultimoEspacio)
+                    : nombreNormalizado.Substring(0, maxLongitud).TrimEnd();
+            }
             
             juegos[i] = juego with { NombreCorto = nombreCorto };
         }

@@ -12,17 +12,17 @@ public partial class PanelEstadisticas : UserControl
     private Estadisticas _estadisticasActuales = new();
 
     // Controles del panel
-    private GroupBox grpEstadisticas;
-    private Label lblTotalJuegos;
-    private Label lblJuegosUnicos;
-    private Label lblDuplicados;
-    private Label lblDesconocidos;
-    private Label lblActualizados;
-    private Label lblGenerosUnicos;
-    private Label lblTasaActualizacion;
-    private Label lblGeneroMasComun;
-    private Button btnExportar;
-    private Button btnActualizar;
+    private GroupBox grpEstadisticas = null!;
+    private Label lblTotalJuegos = null!;
+    private Label lblJuegosUnicos = null!;
+    private Label lblDuplicados = null!;
+    private Label lblDesconocidos = null!;
+    private Label lblActualizados = null!;
+    private Label lblGenerosUnicos = null!;
+    private Label lblTasaActualizacion = null!;
+    private Label lblGeneroMasComun = null!;
+    private Button btnExportar = null!;
+    private Button btnActualizar = null!;
 
     public PanelEstadisticas()
     {
@@ -160,7 +160,7 @@ public partial class PanelEstadisticas : UserControl
     {
         if (InvokeRequired)
         {
-            Invoke(new Action(ActualizarInterfaz));
+            BeginInvoke(new Action(ActualizarInterfaz));
             return;
         }
 

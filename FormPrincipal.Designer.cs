@@ -63,7 +63,7 @@ partial class FormPrincipal
         listaJuegos.UseCompatibleStateImageBehavior = false;
         listaJuegos.View = View.Details;
         listaJuegos.ColumnWidthChanged += listaJuegos_ColumnWidthChanged;
-        listaJuegos.ColumnWidthChanging += listaJuegos_ColumnWidthChanging;
+            // listaJuegos.ColumnWidthChanging += listaJuegos_ColumnWidthChanging; // Comentado - método no existe
         listaJuegos.DoubleClick += listaJuegos_DoubleClick;
         // 
         // colNombre

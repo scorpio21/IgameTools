@@ -16,4 +16,10 @@ Thumbs.db
 .DS_Store
 
 # Debug locales
+DebugLog.txt
 csv/debug_*.txt
+
+# Datos locales (no versionar)
+IG_Data.dat
+genres/
+csv/gameslist*.csv
