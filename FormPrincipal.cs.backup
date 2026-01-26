@@ -14,7 +14,7 @@ namespace IgameToolsWinForms;
 
 public partial class FormPrincipal : Form
 {
-    private const string Version = "0.1.0";
+    private const string Version = "0.2.0";
 
     private string _textoBusqueda = string.Empty;
     private int _columnaOrden = 0;

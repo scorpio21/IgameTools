@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.2.0 - 2026-01-26 (Development Version)
+
+### Planeado (Roadmap)
+
+- **🚀 Migración a .NET 9**: Actualización a la última versión con arquitectura moderna
+- **🗄️ SQLite Database**: Reemplazo de CSV por base de datos con Entity Framework Core
+- **🎨 UI/UX Moderna**: Sistema de temas claro/oscuro y soporte High DPI
+- **🔍 Búsqueda Avanzada**: Full-text search con filtros complejos
+- **🏷️ Sistema de Etiquetas**: Gestión completa de tags con auto-tagging
+- **📊 Análisis Avanzado**: Estadísticas interactivas con gráficos
+- **🔌 Plugin Architecture**: Sistema extensible para terceros
+- **🌐 API Integrations**: Conexión con Steam e IGDB
+- **🧪 Testing Framework**: Cobertura de pruebas >80%
+- **🛡️ Seguridad**: Validación mejorada y manejo robusto de errores
+- **📱 Multiplatform**: Soporte para Linux/macOS con Avalonia UI
+
+### Características Técnicas
+- **Arquitectura MVVM**: Separación de UI y lógica de negocio
+- **Dependency Injection**: Inversión de dependencias con Microsoft.Extensions
+- **Performance**: Optimización para >100,000 juegos
+- **Modern Stack**: .NET 9, EF Core 9, SQLite
+
 ## v0.1.8 - 2026-01-25
 
 ### Corregido

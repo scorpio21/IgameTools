@@ -2,7 +2,7 @@ Guía: Compilar, Publicar, ZIP Portable y Generar Instalador (Inno Setup)
 
 Proyecto: IgameToolsWinForms (WinForms .NET 8)
 Ejecutable principal: IgameToolsWinForms.exe
-Versión instalador: 0.1.0
+Versión instalador: 0.2.0
 Carpeta del proyecto: d:\xampp\htdocs\IgameTools
 
 ------------------------------------------------------------
@@ -68,11 +68,11 @@ $iss = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
 if (!(Test-Path $iss)) { $iss = 'C:\Program Files\Inno Setup 6\ISCC.exe' }
 
 # Compilar installer.iss y generar el .exe en .\publish
-# Nota: puedes pasar versión usando /DMyAppVersion=0.1.0
+# Nota: puedes pasar versión usando /DMyAppVersion=0.2.0
 & "$iss" /Sspawn=0 /V=1 /O"$pwd\publish" "$pwd\installer.iss"
 
 Salida esperada del instalador:
-  d:\xampp\htdocs\IgameTools\publish\IgameTools_0.1.0_Setup.exe
+  d:\xampp\htdocs\IgameTools\publish\IgameTools_0.2.0_Setup.exe
 
 ------------------------------------------------------------
 3b) Crear versión portable (ZIP)
@@ -82,13 +82,13 @@ Desde la misma carpeta del proyecto:
 
 $ErrorActionPreference = 'Stop'
 
-$out = 'publish/IgameTools_0.1.7_Portable.zip'
+$out = 'publish/IgameTools_0.2.0_Portable.zip'
 if (Test-Path $out) { Remove-Item $out -Force }
 
 Compress-Archive -Path 'publish/win-x64-singlefile/*' -DestinationPath $out -Force
 
 Salida esperada del portable:
-  d:\xampp\htdocs\IgameTools\publish\IgameTools_0.1.7_Portable.zip
+  d:\xampp\htdocs\IgameTools\publish\IgameTools_0.2.0_Portable.zip
 
 ------------------------------------------------------------
 3c) Crear ZIP win-x64 (single-file)
@@ -98,19 +98,19 @@ Desde la misma carpeta del proyecto:
 
 $ErrorActionPreference = 'Stop'
 
-$out = 'publish/IgameTools_0.1.7_win-x64_singlefile.zip'
+$out = 'publish/IgameTools_0.2.0_win-x64_singlefile.zip'
 if (Test-Path $out) { Remove-Item $out -Force }
 
 Compress-Archive -Path 'publish/win-x64-singlefile/*' -DestinationPath $out -Force
 
 Salida esperada del ZIP win-x64 single-file:
-  d:\xampp\htdocs\IgameTools\publish\IgameTools_0.1.7_win-x64_singlefile.zip
+  d:\xampp\htdocs\IgameTools\publish\IgameTools_0.2.0_win-x64_singlefile.zip
 
 ------------------------------------------------------------
 4) Verificar que el instalador incluya recursos
 ------------------------------------------------------------
 
-- Asegúrate de que el instalador incluye:
+- Asegúrate de que el instalador incluya:
   - img\...
   - csv\...
 
