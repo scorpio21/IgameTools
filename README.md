@@ -1,6 +1,6 @@
 # IgameToolsWinForms
 
-Aplicación Windows Forms (.NET) para abrir y visualizar `csv/gameslist.csv` (formato IGame) con una interfaz similar a la herramienta original.
+Aplicación Windows Forms (.NET 8) para abrir y visualizar `csv/gameslist.csv` (formato IGame) con una interfaz similar a la herramienta original.
 
 ## Capturas
 
@@ -36,6 +36,8 @@ Al iniciar no carga ningún archivo automáticamente. Usa el botón **Load CSV**
 - **Fix List**: descarga (si hace falta) el archivo `IG_Data*` y `genres` desde FTP y actualiza `Name/Short/Genre`. Los juegos no encontrados se marcan como `Unknown` (en azul) y se pueden filtrar con **Show Unknown**. Durante el proceso se muestra una ventana de estado y al finalizar presenta un resumen detallado con estadísticas de actualización.
 - **Estadísticas**: panel de estadísticas en tiempo real con información general y de Fix List, capacidad de exportar al portapapeles.
 - **Búsqueda Avanzada**: búsqueda avanzada con múltiples filtros y atajos (Ctrl+F).
+- **WHDLoad Tools**: herramienta integrada para descargar y gestionar archivos WHDLoad (juegos de Amiga) desde servidores FTP/HTTP con filtrado avanzado, vista previa de descargas y organización de carpetas. La ventana de descarga muestra el árbol por categorías (Games/Demos/Beta/Magazines), permite seleccionar qué descargar y exportar la selección a TXT sin bloquear la interfaz. Utiliza orden alfabético por defecto (Sorting=Alphabetical).
+- **WHDLoad Tools (Prefs/Filtros)**: `default.prefs` usa formato INI compatible con el original (`[FTP]`, `[Paths]`, `[Filter]` y claves `Filter_*`). La UI de filtros está organizada por `System`, `Chipset`, `Sound` y `Language`.
 - **Interfaz Responsiva**: layout optimizado sin solapamientos, ajuste automático al redimensionar ventana.
 
 Origen FTP actual: `ftp://ftp.grandis.nu/~Uploads/mrv2k/`.
@@ -48,6 +50,7 @@ Origen FTP actual: `ftp://ftp.grandis.nu/~Uploads/mrv2k/`.
 - **Interfaz Responsiva**: Layout optimizado con ajuste dinámico y sin solapamientos
 - **Persistencia**: Guardado automático de preferencias y archivos recientes
 - **Estadísticas en Tiempo Real**: Cálculo y visualización de estadísticas generales y de Fix List
+- **WHDLoad Integration**: Sistema completo para gestión de archivos WHDLoad con soporte HTTP/FTP
 - **Búsqueda Avanzada**: Sistema de búsqueda con múltiples filtros y expresiones regulares
 - **Sistema de Progreso Integrado**: Barra de progreso principal para operaciones largas (cargar, guardar, Fix List)
 

@@ -308,7 +308,8 @@ partial class FormPrincipal
         // 
         // menuUtilidades
         // 
-        menuUtilidades.DropDownItems.AddRange(new ToolStripItem[] { menuItemBusquedaAvanzada });
+        this.menuItemWHDLoadTools = new System.Windows.Forms.ToolStripMenuItem();
+        menuUtilidades.DropDownItems.AddRange(new ToolStripItem[] { menuItemBusquedaAvanzada, menuItemWHDLoadTools });
         menuUtilidades.Name = "menuUtilidades";
         menuUtilidades.Size = new Size(106, 29);
         menuUtilidades.Text = "Utilidades";
@@ -320,6 +321,13 @@ partial class FormPrincipal
         menuItemBusquedaAvanzada.Size = new Size(334, 34);
         menuItemBusquedaAvanzada.Text = "Búsqueda Avanzada";
         menuItemBusquedaAvanzada.Click += MenuItemBusquedaAvanzada_Click;
+        // 
+        // menuItemWHDLoadTools
+        // 
+        menuItemWHDLoadTools.Name = "menuItemWHDLoadTools";
+        menuItemWHDLoadTools.Size = new Size(334, 34);
+        menuItemWHDLoadTools.Text = "WHDLoad Tools";
+        menuItemWHDLoadTools.Click += MenuItemWHDLoadTools_Click;
         // 
         // progressBarPrincipal
         // 
@@ -408,6 +416,7 @@ partial class FormPrincipal
     private System.Windows.Forms.ToolStripMenuItem menuUtilidades;
     private System.Windows.Forms.ToolStripMenuItem menuItemSalir;
     private System.Windows.Forms.ToolStripMenuItem menuItemBusquedaAvanzada;
+    private System.Windows.Forms.ToolStripMenuItem menuItemWHDLoadTools;
     private System.Windows.Forms.ProgressBar progressBarPrincipal;
     private System.Windows.Forms.Label lblEstadoPrincipal;
 }

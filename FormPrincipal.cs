@@ -2355,6 +2355,29 @@ public partial class FormPrincipal : Form
         }
     }
 
+    private void MenuItemWHDLoadTools_Click(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Crear el servicio WHDLoadTools usando el logger de la aplicación
+            var loggerFactory = _services.GetService<ILoggerFactory>();
+            var loggerForm = loggerFactory?.CreateLogger<FormWHDLoadTools>() ?? 
+                           Microsoft.Extensions.Logging.Abstractions.NullLogger<FormWHDLoadTools>.Instance;
+            var loggerServicio = loggerFactory?.CreateLogger<ServicioWHDLoadTools>() ?? 
+                                Microsoft.Extensions.Logging.Abstractions.NullLogger<ServicioWHDLoadTools>.Instance;
+            
+            var servicioWHDLoad = new ServicioWHDLoadTools(loggerServicio);
+            
+            using var formWHDLoad = new FormWHDLoadTools(servicioWHDLoad, loggerForm);
+            formWHDLoad.ShowDialog(this);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, $"Error al abrir WHDLoad Tools: {ex.Message}", "Error", 
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
     #region Métodos de Progreso Principal
 
     private void MostrarProgresoPrincipal(string estado, bool indeterminado = false)

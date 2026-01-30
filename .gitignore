@@ -17,10 +17,16 @@ Thumbs.db
 
 # Debug locales
 DebugLog.txt
+DebugLog/
 csv/debug_*.txt
+logs/*
 
 # Datos locales (no versionar)
 IG_Data.dat
 genres
 genres/
 csv/gameslist*.csv
+
+# WHDLoad Tools (datos descargados/locales)
+Download/
+download_list*.txt

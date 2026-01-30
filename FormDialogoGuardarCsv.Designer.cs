@@ -28,104 +28,112 @@ namespace IgameToolsWinForms
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblInstruccion = new System.Windows.Forms.Label();
-            this.txtNombreArchivo = new System.Windows.Forms.TextBox();
-            this.txtRutaCompleta = new System.Windows.Forms.TextBox();
-            this.cmbCarpetasRapidas = new System.Windows.Forms.ComboBox();
-            this.lstArchivos = new System.Windows.Forms.ListBox();
-            this.btnAceptar = new System.Windows.Forms.Button();
-            this.btnCancelar = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormDialogoGuardarCsv));
+            lblInstruccion = new Label();
+            txtNombreArchivo = new TextBox();
+            txtRutaCompleta = new TextBox();
+            cmbCarpetasRapidas = new ComboBox();
+            lstArchivos = new ListBox();
+            btnAceptar = new Button();
+            btnCancelar = new Button();
+            SuspendLayout();
             // 
             // lblInstruccion
             // 
-            this.lblInstruccion.AutoSize = true;
-            this.lblInstruccion.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblInstruccion.Location = new System.Drawing.Point(20, 20);
-            this.lblInstruccion.Name = "lblInstruccion";
-            this.lblInstruccion.Size = new System.Drawing.Size(300, 25);
-            this.lblInstruccion.TabIndex = 0;
-            this.lblInstruccion.Text = "Guardar archivo CSV como:";
+            lblInstruccion.AutoSize = true;
+            lblInstruccion.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblInstruccion.Location = new Point(29, 31);
+            lblInstruccion.Margin = new Padding(4, 0, 4, 0);
+            lblInstruccion.Name = "lblInstruccion";
+            lblInstruccion.Size = new Size(269, 28);
+            lblInstruccion.TabIndex = 0;
+            lblInstruccion.Text = "Guardar archivo CSV como:";
             // 
             // txtNombreArchivo
             // 
-            this.txtNombreArchivo.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtNombreArchivo.Location = new System.Drawing.Point(20, 55);
-            this.txtNombreArchivo.Name = "txtNombreArchivo";
-            this.txtNombreArchivo.Size = new System.Drawing.Size(750, 25);
-            this.txtNombreArchivo.TabIndex = 1;
-            this.txtNombreArchivo.Text = "gameslist.csv";
+            txtNombreArchivo.Font = new Font("Segoe UI", 9F);
+            txtNombreArchivo.Location = new Point(29, 86);
+            txtNombreArchivo.Margin = new Padding(4, 5, 4, 5);
+            txtNombreArchivo.Name = "txtNombreArchivo";
+            txtNombreArchivo.Size = new Size(1070, 31);
+            txtNombreArchivo.TabIndex = 1;
+            txtNombreArchivo.Text = "gameslist.csv";
             // 
             // txtRutaCompleta
             // 
-            this.txtRutaCompleta.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtRutaCompleta.Location = new System.Drawing.Point(20, 95);
-            this.txtRutaCompleta.Name = "txtRutaCompleta";
-            this.txtRutaCompleta.ReadOnly = true;
-            this.txtRutaCompleta.Size = new System.Drawing.Size(750, 25);
-            this.txtRutaCompleta.TabIndex = 2;
+            txtRutaCompleta.Font = new Font("Segoe UI", 9F);
+            txtRutaCompleta.Location = new Point(29, 148);
+            txtRutaCompleta.Margin = new Padding(4, 5, 4, 5);
+            txtRutaCompleta.Name = "txtRutaCompleta";
+            txtRutaCompleta.ReadOnly = true;
+            txtRutaCompleta.Size = new Size(1070, 31);
+            txtRutaCompleta.TabIndex = 2;
             // 
             // cmbCarpetasRapidas
             // 
-            this.cmbCarpetasRapidas.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbCarpetasRapidas.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.cmbCarpetasRapidas.Location = new System.Drawing.Point(20, 130);
-            this.cmbCarpetasRapidas.Name = "cmbCarpetasRapidas";
-            this.cmbCarpetasRapidas.Size = new System.Drawing.Size(750, 25);
-            this.cmbCarpetasRapidas.TabIndex = 3;
+            cmbCarpetasRapidas.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbCarpetasRapidas.Font = new Font("Segoe UI", 9F);
+            cmbCarpetasRapidas.Location = new Point(29, 203);
+            cmbCarpetasRapidas.Margin = new Padding(4, 5, 4, 5);
+            cmbCarpetasRapidas.Name = "cmbCarpetasRapidas";
+            cmbCarpetasRapidas.Size = new Size(1070, 33);
+            cmbCarpetasRapidas.TabIndex = 3;
             // 
             // lstArchivos
             // 
-            this.lstArchivos.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lstArchivos.FormattingEnabled = true;
-            this.lstArchivos.ItemHeight = 16;
-            this.lstArchivos.Location = new System.Drawing.Point(20, 165);
-            this.lstArchivos.Name = "lstArchivos";
-            this.lstArchivos.SelectionMode = System.Windows.Forms.SelectionMode.One;
-            this.lstArchivos.Size = new System.Drawing.Size(750, 410);
-            this.lstArchivos.TabIndex = 4;
+            lstArchivos.Font = new Font("Segoe UI", 9F);
+            lstArchivos.FormattingEnabled = true;
+            lstArchivos.Location = new Point(29, 258);
+            lstArchivos.Margin = new Padding(4, 5, 4, 5);
+            lstArchivos.Name = "lstArchivos";
+            lstArchivos.Size = new Size(1070, 629);
+            lstArchivos.TabIndex = 4;
             // 
             // btnAceptar
             // 
-            this.btnAceptar.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnAceptar.Location = new System.Drawing.Point(20, 585);
-            this.btnAceptar.Name = "btnAceptar";
-            this.btnAceptar.Size = new System.Drawing.Size(100, 40);
-            this.btnAceptar.TabIndex = 5;
-            this.btnAceptar.Text = "Guardar";
-            this.btnAceptar.UseVisualStyleBackColor = true;
+            btnAceptar.Font = new Font("Segoe UI", 9F);
+            btnAceptar.Location = new Point(29, 914);
+            btnAceptar.Margin = new Padding(4, 5, 4, 5);
+            btnAceptar.Name = "btnAceptar";
+            btnAceptar.Size = new Size(143, 62);
+            btnAceptar.TabIndex = 5;
+            btnAceptar.Text = "Guardar";
+            btnAceptar.UseVisualStyleBackColor = true;
             // 
             // btnCancelar
             // 
-            this.btnCancelar.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancelar.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnCancelar.Location = new System.Drawing.Point(130, 585);
-            this.btnCancelar.Name = "btnCancelar";
-            this.btnCancelar.Size = new System.Drawing.Size(80, 40);
-            this.btnCancelar.TabIndex = 6;
-            this.btnCancelar.Text = "Cancelar";
-            this.btnCancelar.UseVisualStyleBackColor = true;
+            btnCancelar.DialogResult = DialogResult.Cancel;
+            btnCancelar.Font = new Font("Segoe UI", 9F);
+            btnCancelar.Location = new Point(186, 914);
+            btnCancelar.Margin = new Padding(4, 5, 4, 5);
+            btnCancelar.Name = "btnCancelar";
+            btnCancelar.Size = new Size(114, 62);
+            btnCancelar.TabIndex = 6;
+            btnCancelar.Text = "Cancelar";
+            btnCancelar.UseVisualStyleBackColor = true;
             // 
             // FormDialogoGuardarCsv
             // 
-            this.AcceptButton = this.btnAceptar;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btnCancelar;
-            this.ClientSize = new System.Drawing.Size(790, 637);
-            this.Controls.Add(this.lstArchivos);
-            this.Controls.Add(this.cmbCarpetasRapidas);
-            this.Controls.Add(this.txtRutaCompleta);
-            this.Controls.Add(this.txtNombreArchivo);
-            this.Controls.Add(this.lblInstruccion);
-            this.Controls.Add(this.btnCancelar);
-            this.Controls.Add(this.btnAceptar);
-            this.MinimumSize = new System.Drawing.Size(800, 630);
-            this.Name = "FormDialogoGuardarCsv";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Guardar Archivo CSV";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AcceptButton = btnAceptar;
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            CancelButton = btnCancelar;
+            ClientSize = new Size(1129, 995);
+            Controls.Add(lstArchivos);
+            Controls.Add(cmbCarpetasRapidas);
+            Controls.Add(txtRutaCompleta);
+            Controls.Add(txtNombreArchivo);
+            Controls.Add(lblInstruccion);
+            Controls.Add(btnCancelar);
+            Controls.Add(btnAceptar);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(4, 5, 4, 5);
+            MinimumSize = new Size(1133, 953);
+            Name = "FormDialogoGuardarCsv";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Guardar Archivo CSV";
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 

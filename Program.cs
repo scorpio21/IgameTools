@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using IgameToolsWinForms.Interfaces;
 using IgameToolsWinForms.Servicios;
+using Serilog;
 
 namespace IgameToolsWinForms;
 
@@ -48,7 +49,13 @@ internal class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args)
     {
-        return Host.CreateDefaultBuilder()
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File("logs/igametools-.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        return Host.CreateDefaultBuilder(args)
+            .UseSerilog()
             .ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -63,6 +70,7 @@ internal class Program
                 {
                     builder.AddConsole();
                     builder.AddDebug();
+                    builder.AddSerilog();
                 });
 
                 // Registrar configuración

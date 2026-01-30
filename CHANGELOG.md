@@ -1,26 +1,31 @@
 # Changelog
 
-## v0.2.0 - 2026-01-26 (Development Version)
+## v0.2.0 - 2026-01-31
 
-### Planeado (Roadmap)
+### Añadido
 
-- **🚀 Migración a .NET 9**: Actualización a la última versión con arquitectura moderna
-- **🗄️ SQLite Database**: Reemplazo de CSV por base de datos con Entity Framework Core
-- **🎨 UI/UX Moderna**: Sistema de temas claro/oscuro y soporte High DPI
-- **🔍 Búsqueda Avanzada**: Full-text search con filtros complejos
-- **🏷️ Sistema de Etiquetas**: Gestión completa de tags con auto-tagging
-- **📊 Análisis Avanzado**: Estadísticas interactivas con gráficos
-- **🔌 Plugin Architecture**: Sistema extensible para terceros
-- **🌐 API Integrations**: Conexión con Steam e IGDB
-- **🧪 Testing Framework**: Cobertura de pruebas >80%
-- **🛡️ Seguridad**: Validación mejorada y manejo robusto de errores
-- **📱 Multiplatform**: Soporte para Linux/macOS con Avalonia UI
+- **WHDLoad Tools: ventana de descarga interna** tipo consola (WinForms) con:
+  - fondo negro, fuente monoespaciada
+  - salida con colores por línea
+  - icono (soporta `img/amiga.ico` y `img/amiga.png`)
 
-### Características Técnicas
-- **Arquitectura MVVM**: Separación de UI y lógica de negocio
-- **Dependency Injection**: Inversión de dependencias con Microsoft.Extensions
-- **Performance**: Optimización para >100,000 juegos
-- **Modern Stack**: .NET 9, EF Core 9, SQLite
+### Cambiado
+
+- **WHDLoad Tools: filtros** sincronizados y ampliados para replicar el original (System/Chipset/Sound/Language/Memory/Misc).
+- **WHDLoad Tools: idiomas** alineados con el original PureBasic (detección por sufijos `_Hr`, `_Cz`, `_De`, `_Dk`, `_Es`, `_Fi`, `_Fr`, `_Gr`, `_It`, `_Nl`, `_Pl`, `_Se` y Multi por `_DeFrIt`, `_DeEsFrIt`).
+- **WHDLoad Tools: ordenación** soporta:
+  - Alphabetical
+  - Category
+  - Category (0-Z)
+  y el valor por defecto es **Alphabetical**.
+- **WHDLoad Tools: Split Languages** implementado como en el original:
+  - Ignore: género por sistema/chipset
+  - Split: los no-ingleses pasan a género=idioma
+
+### Corregido
+
+- **Salida de descarga**: eliminados procesos externos (`cmd/powershell`) y ruido de consola; ahora se usa la ventana interna.
+- **UI listado WHDLoad**: colores de la lista principal (Missing en rojo, disponibles en verde).
 
 ## v0.1.8 - 2026-01-25
 
@@ -67,7 +72,7 @@
 
 ## v0.1.6 - 2026-01-24
 
-### Añadido
+### Añadido (v0.1.6)
 - Sistema de Undo/Redo robusto usando Command pattern:
   - Interfaz `ICommand` y comandos concretos para todas las acciones.
   - `EditarJuegoCommand` para edición individual de juegos.
@@ -79,7 +84,8 @@
   - Botón Deshacer muestra descripción de la acción.
 - Búsqueda rápida con TextBox anclado correctamente a la interfaz.
 
-### Cambiado
+### Cambiado (v0.1.6)
+
 - El TextBox de búsqueda ahora mantiene su posición al redimensionar la ventana.
 - Todas las acciones principales ahora son deshacibles.
 
