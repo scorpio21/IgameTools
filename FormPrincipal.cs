@@ -19,9 +19,10 @@ namespace IgameToolsWinForms;
 
 public partial class FormPrincipal : Form
 {
-    private static string Version => 
-        System.Reflection.Assembly.GetExecutingAssembly()
-            .GetName().Version?.ToString() ?? "0.2.0";
+    private static string Version =>
+        string.IsNullOrWhiteSpace(Application.ProductVersion)
+            ? "0.2.0"
+            : Application.ProductVersion.Split('+')[0];
 
     private string _textoBusqueda = string.Empty;
     private int _columnaOrden = 0;

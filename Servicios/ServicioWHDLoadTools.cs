@@ -366,15 +366,18 @@ namespace IgameToolsWinForms.Servicios
                     _logger.LogInformation("La carpeta Dats ya existe");
                 }
                 
-                // Lista de archivos ZIP a descargar (como en el original)
-                var zipFiles = new[]
+                // Lista de archivos ZIP a descargar
+                // Nota: estos ficheros cambian de fecha con el tiempo. Para evitar errores (550),
+                // se selecciona automáticamente el ZIP más reciente por categoría.
+                var zipFiles = await ObtenerZipsMasRecientesDesdeFtpAsync(consoleProcess);
+                if (zipFiles.Count == 0)
                 {
-                    "Commodore Amiga - WHDLoad - Magazines (2025-07-24).zip",
-                    "Commodore Amiga - WHDLoad - Games - Beta & Unofficial (2026-01-12).zip",
-                    "Commodore Amiga - WHDLoad - Games (2026-01-24).zip",
-                    "Commodore Amiga - WHDLoad - Demos - Beta & Unofficial (2025-07-24).zip",
-                    "Commodore Amiga - WHDLoad - Demos (2025-09-20).zip"
-                };
+                    await SendToConsoleAsync(consoleProcess, "");
+                    SendToConsoleColored(consoleProcess, "ERROR: No se pudieron listar/seleccionar ZIPs desde el FTP.", ConsoleColor.Red);
+                    await SendToConsoleAsync(consoleProcess, "Revisa servidor/carpeta/credenciales o conexión.");
+                    await CloseConsoleProcess(consoleProcess);
+                    return new List<string>();
+                }
                 
                 var downloadedFiles = new List<string>();
                 var fileCount = 0;
@@ -438,6 +441,115 @@ namespace IgameToolsWinForms.Servicios
                 _logger.LogError(ex, $"Error escaneando directorio {url}");
                 return new List<string>();
             }
+        }
+
+        private async Task<List<string>> ObtenerZipsMasRecientesDesdeFtpAsync(SesionConsolaDescarga consoleProcess)
+        {
+            try
+            {
+                var nombres = await ListarDirectorioFtpAsync();
+                if (nombres.Count == 0)
+                {
+                    return new List<string>();
+                }
+
+                var zips = nombres
+                    .Where(n => n.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                var seleccionados = new List<string?>
+                {
+                    SeleccionarZipMasReciente(zips, "Commodore Amiga - WHDLoad - Games"),
+                    SeleccionarZipMasReciente(zips, "Commodore Amiga - WHDLoad - Games - Beta & Unofficial"),
+                    SeleccionarZipMasReciente(zips, "Commodore Amiga - WHDLoad - Demos"),
+                    SeleccionarZipMasReciente(zips, "Commodore Amiga - WHDLoad - Demos - Beta & Unofficial"),
+                    SeleccionarZipMasReciente(zips, "Commodore Amiga - WHDLoad - Magazines"),
+                };
+
+                var resultado = seleccionados
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Cast<string>()
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (resultado.Count > 0)
+                {
+                    await SendToConsoleAsync(consoleProcess, "");
+                    await SendToConsoleAsync(consoleProcess, "Zips seleccionados automáticamente:");
+                    foreach (var r in resultado)
+                    {
+                        await SendToConsoleAsync(consoleProcess, $"- {r}");
+                    }
+                }
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "No se pudo listar el FTP para seleccionar ZIPs automáticamente");
+                return new List<string>();
+            }
+        }
+
+        private async Task<List<string>> ListarDirectorioFtpAsync()
+        {
+            var ftpUrl = $"ftp://{_settings.FtpServer}/{_settings.FtpFolder}/";
+            var request = (FtpWebRequest)WebRequest.Create(ftpUrl);
+            request.Method = WebRequestMethods.Ftp.ListDirectory;
+            request.Credentials = new NetworkCredential(_settings.FtpUser, _settings.FtpPass);
+            request.UseBinary = true;
+            request.UsePassive = true;
+            request.KeepAlive = false;
+
+            using var response = (FtpWebResponse)await request.GetResponseAsync();
+            using var stream = response.GetResponseStream();
+            if (stream == null)
+            {
+                return new List<string>();
+            }
+
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            var raw = await reader.ReadToEndAsync();
+
+            return raw
+                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+        }
+
+        private static string? SeleccionarZipMasReciente(List<string> zipFiles, string prefijo)
+        {
+            var candidatos = zipFiles
+                .Where(z => z.StartsWith(prefijo, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (candidatos.Count == 0)
+            {
+                return null;
+            }
+
+            return candidatos
+                .OrderByDescending(z => ExtraerFechaDeNombreZip(z) ?? DateTime.MinValue)
+                .ThenByDescending(z => z, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault();
+        }
+
+        private static DateTime? ExtraerFechaDeNombreZip(string nombre)
+        {
+            // Formato esperado: "... (YYYY-MM-DD).zip"
+            var match = Regex.Match(nombre, @"\((\d{4}-\d{2}-\d{2})\)\.zip$", RegexOptions.IgnoreCase);
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            if (DateTime.TryParse(match.Groups[1].Value, out var fecha))
+            {
+                return fecha.Date;
+            }
+
+            return null;
         }
 
         private Task SendToConsoleAsync(SesionConsolaDescarga? consola, string message)
@@ -1487,8 +1599,12 @@ namespace IgameToolsWinForms.Servicios
                 var consoleProcess = StartConsoleProcess("WHDLoad Download Tool");
 
                 // Enviar mensaje inicial
+                var version = string.IsNullOrWhiteSpace(System.Windows.Forms.Application.ProductVersion)
+                    ? "0.2.0"
+                    : System.Windows.Forms.Application.ProductVersion.Split('+')[0];
+
                 SendToConsoleAsync(consoleProcess, "===============================================");
-                SendToConsoleAsync(consoleProcess, "    WHDLoad Download Tool v1.7");
+                SendToConsoleAsync(consoleProcess, $"    WHDLoad Download Tool v{version}");
                 SendToConsoleAsync(consoleProcess, "===============================================");
                 SendToConsoleAsync(consoleProcess, "");
                 SendToConsoleColored(consoleProcess, "Checking for update...", ConsoleColor.Cyan);
@@ -2227,6 +2343,7 @@ namespace IgameToolsWinForms.Servicios
                                     FileLanguage = language,
                                     FileSubFolder = subFolder,
                                     FileVersion = version,
+                                    FileAmiga = true,
                                     FileAvailable = false,
                                     FileFiltered = true
                                 };

@@ -1888,7 +1888,11 @@ namespace IgameToolsWinForms
 
                 var totalSizeMB = totalSize / (1024.0 * 1024.0);
 
-                this.Text = $"WHDLoad Tools v1.7 - (Mostrando {_servicio.FilteredList.Count} de {_servicio.GameList.Count}) - ({totalSizeMB:F2} MB)";
+                var version = string.IsNullOrWhiteSpace(Application.ProductVersion)
+                    ? "0.2.0"
+                    : Application.ProductVersion.Split('+')[0];
+
+                this.Text = $"WHDLoad Tools v{version} - (Mostrando {_servicio.FilteredList.Count} de {_servicio.GameList.Count}) - ({totalSizeMB:F2} MB)";
             }
             catch (Exception ex)
             {

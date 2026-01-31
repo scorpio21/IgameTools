@@ -14,6 +14,7 @@ Las capturas se guardan en `img/`.
 
 - Visual Studio 2022
 - .NET 8 SDK
+- (Opcional) Inno Setup 6 (para generar instalador)
 
 ## Ejecutar
 
@@ -21,6 +22,37 @@ Las capturas se guardan en `img/`.
 2. Ejecuta el proyecto.
 
 Al iniciar no carga ningún archivo automáticamente. Usa el botón **Load CSV** para seleccionar un archivo `gameslist.csv`.
+
+## Publicar (publish/ZIP/instalador)
+
+Para automatizar los pasos de `Guia_Compilacion_Instalador.txt` existe una herramienta incluida en el repo:
+
+`CompileTols/IgameToolsPublishTool`
+
+Características:
+
+- **Build** (`dotnet build`)
+- **Publish** (Release, `win-x64`, self-contained, single-file)
+- **Copia recursos** (`img/` y `csv/` al directorio publicado)
+- **ZIP portable** y **ZIP single-file**
+- **Instalador** (Inno Setup `ISCC.exe`, pasando `/DMyAppVersion`)
+
+Uso:
+
+1. Abre `CompileTols/IgameToolsPublishTool/IgameToolsPublishTool.csproj`.
+2. Ejecuta la herramienta.
+3. Indica:
+   - Ruta del proyecto (carpeta raíz donde está `IgameToolsWinForms.csproj`).
+   - Versión (ej: `0.2.0`).
+   - Ruta a `ISCC.exe` si quieres generar instalador.
+4. Sigue el asistente por pasos (menú **Ayuda → Guía paso a paso**):
+   - Paso 1: Build
+   - Paso 2: Publish (incluye copia de recursos `img/` y `csv/`)
+   - Paso 3: Instalador (Inno Setup)
+   - Paso 3b: ZIP portable
+   - Paso 3c: ZIP single-file
+   - Paso 4: Verificar recursos
+   - Paso 5: Fallback limpieza (plan B)
 
 ## Funcionalidad actual
 
@@ -39,6 +71,7 @@ Al iniciar no carga ningún archivo automáticamente. Usa el botón **Load CSV**
 - **WHDLoad Tools**: herramienta integrada para descargar y gestionar archivos WHDLoad (juegos de Amiga) desde servidores FTP/HTTP con filtrado avanzado, vista previa de descargas y organización de carpetas. La ventana de descarga muestra el árbol por categorías (Games/Demos/Beta/Magazines), permite seleccionar qué descargar y exportar la selección a TXT sin bloquear la interfaz. Utiliza orden alfabético por defecto (Sorting=Alphabetical).
 - **WHDLoad Tools (Prefs/Filtros)**: `default.prefs` usa formato INI compatible con el original (`[FTP]`, `[Paths]`, `[Filter]` y claves `Filter_*`). La UI de filtros está organizada por `System`, `Chipset`, `Sound` y `Language`.
 - **WHDLoad Tools (Barra de estado)**: barra inferior como en el original mostrando datos del juego seleccionado: `System`, `Chipset`, `TV System`, `Language`, `Type`, `Status`, `Size` y `Version`.
+- **WHDLoad Tools (FTP ZIPs)**: los packs WHDLoad cambian de fecha (por ejemplo `...Games (YYYY-MM-DD).zip`). Para evitar errores 550, la app lista el directorio FTP y selecciona automáticamente el ZIP más reciente por categoría.
 - **WHDLoad Tools (Lists)**: implementado el sistema de listas del original con:
   - `Edit List` (lista ordenada alfabéticamente y checks según `FileIgnore`)
   - `Load List` / `Save List` / `Append List`
@@ -46,7 +79,7 @@ Al iniciar no carga ningún archivo automáticamente. Usa el botón **Load CSV**
   - Los diálogos `.lst` abren por defecto en la carpeta `Lists` (y recuerdan la última ruta)
 - **Interfaz Responsiva**: layout optimizado sin solapamientos, ajuste automático al redimensionar ventana.
 
-Origen FTP actual: `ftp://ftp.grandis.nu/~Uploads/mrv2k/`.
+Origen FTP actual: `ftp://ftp2.grandis.nu/`.
 
 ## Características Técnicas
 

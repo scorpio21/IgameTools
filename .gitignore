@@ -7,6 +7,7 @@ publish/
 .vs/
 *.user
 *.suo
+*.csproj.user
 
 # Rider
 .idea/
