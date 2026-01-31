@@ -8,6 +8,11 @@
   - fondo negro, fuente monoespaciada
   - salida con colores por línea
   - icono (soporta `img/amiga.ico` y `img/amiga.png`)
+- **Herramienta de publicación** en `CompileTols/IgameToolsPublishTool` para automatizar:
+  - Build / Publish (single-file) / copia de recursos
+  - ZIPs (portable y single-file)
+  - Instalador (Inno Setup)
+  - Flujo guiado por pasos con menú de ayuda
 
 ### Cambiado
 
@@ -21,11 +26,14 @@
 - **WHDLoad Tools: Split Languages** implementado como en el original:
   - Ignore: género por sistema/chipset
   - Split: los no-ingleses pasan a género=idioma
+- **Versionado app**: `ProductVersion` y títulos muestran `0.2.0` (sin sufijo de commit).
 
 ### Corregido
 
 - **Salida de descarga**: eliminados procesos externos (`cmd/powershell`) y ruido de consola; ahora se usa la ventana interna.
 - **UI listado WHDLoad**: colores de la lista principal (Missing en rojo, disponibles en verde).
+- **WHDLoad Tools (FTP)**: selección automática del ZIP más reciente por categoría para evitar errores 550 cuando cambian las fechas.
+- **WHDLoad Tools (Barra de estado)**: `System` ya no queda en `?` (por defecto `Amiga`).
 
 ## v0.1.8 - 2026-01-25
 
