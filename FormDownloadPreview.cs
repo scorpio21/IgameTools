@@ -58,70 +58,75 @@ namespace IgameToolsWinForms
 
         private void InitializeComponent()
         {
-            this.lstPreview = new System.Windows.Forms.ListBox();
-            this.lblTotal = new System.Windows.Forms.Label();
-            this.lblSize = new System.Windows.Forms.Label();
-            this.btnClose = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormDownloadPreview));
+            lstPreview = new ListBox();
+            lblTotal = new Label();
+            lblSize = new Label();
+            btnClose = new Button();
+            SuspendLayout();
             // 
             // lstPreview
             // 
-            this.lstPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstPreview.FormattingEnabled = true;
-            this.lstPreview.ItemHeight = 16;
-            this.lstPreview.Location = new System.Drawing.Point(12, 12);
-            this.lstPreview.Name = "lstPreview";
-            this.lstPreview.Size = new System.Drawing.Size(560, 276);
-            this.lstPreview.TabIndex = 0;
+            lstPreview.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lstPreview.FormattingEnabled = true;
+            lstPreview.ItemHeight = 25;
+            lstPreview.Location = new Point(15, 19);
+            lstPreview.Margin = new Padding(4, 5, 4, 5);
+            lstPreview.Name = "lstPreview";
+            lstPreview.Size = new Size(699, 429);
+            lstPreview.TabIndex = 0;
             // 
             // lblTotal
             // 
-            this.lblTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblTotal.AutoSize = true;
-            this.lblTotal.Location = new System.Drawing.Point(12, 300);
-            this.lblTotal.Name = "lblTotal";
-            this.lblTotal.Size = new System.Drawing.Size(79, 17);
-            this.lblTotal.TabIndex = 1;
-            this.lblTotal.Text = "Total archivos: 0";
+            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblTotal.AutoSize = true;
+            lblTotal.Location = new Point(15, 469);
+            lblTotal.Margin = new Padding(4, 0, 4, 0);
+            lblTotal.Name = "lblTotal";
+            lblTotal.Size = new Size(138, 25);
+            lblTotal.TabIndex = 1;
+            lblTotal.Text = "Total archivos: 0";
             // 
             // lblSize
             // 
-            this.lblSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblSize.AutoSize = true;
-            this.lblSize.Location = new System.Drawing.Point(12, 327);
-            this.lblSize.Name = "lblSize";
-            this.lblSize.Size = new System.Drawing.Size(75, 17);
-            this.lblSize.TabIndex = 2;
-            this.lblSize.Text = "Tamaño total: 0";
+            lblSize.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblSize.AutoSize = true;
+            lblSize.Location = new Point(15, 511);
+            lblSize.Margin = new Padding(4, 0, 4, 0);
+            lblSize.Name = "lblSize";
+            lblSize.Size = new Size(134, 25);
+            lblSize.TabIndex = 2;
+            lblSize.Text = "Tamaño total: 0";
             // 
             // btnClose
             // 
-            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Location = new System.Drawing.Point(497, 300);
-            this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(75, 30);
-            this.btnClose.TabIndex = 3;
-            this.btnClose.Text = "Cerrar";
-            this.btnClose.UseVisualStyleBackColor = true;
-            this.btnClose.Click += new System.EventHandler(this.BtnClose_Click);
+            btnClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnClose.DialogResult = DialogResult.Cancel;
+            btnClose.Location = new Point(621, 469);
+            btnClose.Margin = new Padding(4, 5, 4, 5);
+            btnClose.Name = "btnClose";
+            btnClose.Size = new Size(94, 47);
+            btnClose.TabIndex = 3;
+            btnClose.Text = "Cerrar";
+            btnClose.UseVisualStyleBackColor = true;
+            btnClose.Click += BtnClose_Click;
             // 
             // FormDownloadPreview
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(584, 357);
-            this.Controls.Add(this.btnClose);
-            this.Controls.Add(this.lblSize);
-            this.Controls.Add(this.lblTotal);
-            this.Controls.Add(this.lstPreview);
-            this.MinimumSize = new System.Drawing.Size(400, 300);
-            this.Name = "FormDownloadPreview";
-            this.Text = "Vista Previa de Descarga";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(730, 558);
+            Controls.Add(btnClose);
+            Controls.Add(lblSize);
+            Controls.Add(lblTotal);
+            Controls.Add(lstPreview);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(4, 5, 4, 5);
+            MinimumSize = new Size(494, 437);
+            Name = "FormDownloadPreview";
+            Text = "Vista Previa de Descarga";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private System.Windows.Forms.ListBox lstPreview;

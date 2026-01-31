@@ -503,7 +503,7 @@ namespace IgameToolsWinForms
 
                 var status = game.FileAvailable ? "Available" : "Missing";
                 var sizeKb = game.FileSize > 0 ? (game.FileSize / 1024) : 0;
-                var version = string.IsNullOrWhiteSpace(game.FileVersion) ? "" : game.FileVersion;
+                var version = string.IsNullOrWhiteSpace(game.FileVersion) ? "?" : game.FileVersion;
 
                 lblSystem.Text = $"System: {sistema}";
                 lblChipset.Text = $"Chipset: {chipset}";
@@ -862,22 +862,22 @@ namespace IgameToolsWinForms
                     ActualizarListaJuegos();
                     ActualizarTitulo();
 
-                    lblStatus.Text = string.Empty;
+                 /*   lblStatus.Text = string.Empty;
                     MessageBox.Show($"Escaneo completado. {_servicio.GameList.Count} juegos encontrados.",
-                                  "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                  "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);*/
                 }
                 else
                 {
-                    lblStatus.Text = "Error en el escaneo";
+                   /* lblStatus.Text = "Error en el escaneo";
                     MessageBox.Show("Error durante el escaneo. Revise el log para más detalles.",
-                                  "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                  "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en BtnScan_Click");
+             /*   _logger.LogError(ex, "Error en BtnScan_Click");
                 lblStatus.Text = "Error";
-                MessageBox.Show($"Error durante el escaneo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error durante el escaneo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
             }
             finally
             {
@@ -1347,8 +1347,8 @@ namespace IgameToolsWinForms
                     lstMain.Items.AddRange(items);
                 }
 
-                lblStatus.Text = $"Mostrando {_servicio.FilteredList.Count} de {_servicio.GameList.Count} juegos";
-                EscribirLogDebug($"ActualizarListaJuegos OK items={lstMain.Items.Count}");
+               /* lblStatus.Text = $"Mostrando {_servicio.FilteredList.Count} de {_servicio.GameList.Count} juegos";
+                EscribirLogDebug($"ActualizarListaJuegos OK items={lstMain.Items.Count}");*/
             }
             catch (Exception ex)
             {

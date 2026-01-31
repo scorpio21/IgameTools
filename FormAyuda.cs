@@ -16,31 +16,37 @@ public partial class FormAyuda : Form
 
     private void InitializeComponent()
     {
-        this.SuspendLayout();
-
-        // Configuración del formulario
-        this.Text = "Ayuda - IgameTools by Scorpio21";
-        this.Size = new Size(600, 500);
-        this.StartPosition = FormStartPosition.CenterParent;
-        this.FormBorderStyle = FormBorderStyle.FixedDialog;
-        this.MaximizeBox = false;
-        this.MinimizeBox = false;
-        this.ShowInTaskbar = false;
-
-        // RichTextBox para el contenido de ayuda
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAyuda));
         richTextBoxAyuda = new RichTextBox();
-        richTextBoxAyuda.Dock = DockStyle.Fill;
-        richTextBoxAyuda.ReadOnly = true;
+        SuspendLayout();
+        // 
+        // richTextBoxAyuda
+        // 
         richTextBoxAyuda.BackColor = Color.White;
-        richTextBoxAyuda.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-        richTextBoxAyuda.ScrollBars = RichTextBoxScrollBars.Vertical;
-        richTextBoxAyuda.WordWrap = true;
+        richTextBoxAyuda.Dock = DockStyle.Fill;
+        richTextBoxAyuda.Font = new Font("Segoe UI", 9F);
+        richTextBoxAyuda.Location = new Point(0, 0);
         richTextBoxAyuda.Margin = new Padding(10);
-
-        // Agregar controles al formulario
-        this.Controls.Add(richTextBoxAyuda);
-
-        this.ResumeLayout(false);
+        richTextBoxAyuda.Name = "richTextBoxAyuda";
+        richTextBoxAyuda.ReadOnly = true;
+        richTextBoxAyuda.ScrollBars = RichTextBoxScrollBars.Vertical;
+        richTextBoxAyuda.Size = new Size(578, 444);
+        richTextBoxAyuda.TabIndex = 0;
+        richTextBoxAyuda.Text = "";
+        // 
+        // FormAyuda
+        // 
+        ClientSize = new Size(578, 444);
+        Controls.Add(richTextBoxAyuda);
+        FormBorderStyle = FormBorderStyle.FixedDialog;
+        Icon = (Icon)resources.GetObject("$this.Icon");
+        MaximizeBox = false;
+        MinimizeBox = false;
+        Name = "FormAyuda";
+        ShowInTaskbar = false;
+        StartPosition = FormStartPosition.CenterParent;
+        Text = "Ayuda - IgameTools by Scorpio21";
+        ResumeLayout(false);
     }
 
     private void CargarContenidoAyuda()

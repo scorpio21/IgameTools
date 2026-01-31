@@ -15,6 +15,7 @@ partial class FormEditarJuego
 
     private void InitializeComponent()
     {
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormEditarJuego));
         lblNombre = new Label();
         txtNombre = new TextBox();
         lblNombreCorto = new Label();
@@ -140,6 +141,7 @@ partial class FormEditarJuego
         Controls.Add(txtNombre);
         Controls.Add(lblNombre);
         FormBorderStyle = FormBorderStyle.FixedDialog;
+        Icon = (Icon)resources.GetObject("$this.Icon");
         Margin = new Padding(4, 5, 4, 5);
         MaximizeBox = false;
         MinimizeBox = false;

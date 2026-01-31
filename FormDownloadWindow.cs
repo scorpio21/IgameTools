@@ -17,6 +17,8 @@ namespace IgameToolsWinForms
     {
         private List<DownData> _downloadList;
         private bool _confirmed = false;
+        private Button btnStart;
+        private Button btnCancel;
         private Button btnSaveTxt;
 
         public bool Confirmed => _confirmed;
@@ -24,109 +26,99 @@ namespace IgameToolsWinForms
         public bool ExpandTreeSelected => chkExpandTree.Checked;
         public bool SaveTxtClicked { get; private set; }
 
+        public FormDownloadWindow()
+        {
+            _downloadList = new List<DownData>();
+            InitializeComponent();
+        }
+
         public FormDownloadWindow(List<DownData> downloadList)
         {
             _downloadList = downloadList ?? new List<DownData>();
             InitializeComponent();
+            Text = $"File Download ({_downloadList.Count} Files)";
             LoadDownloadList();
         }
 
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-
-            // Configuración del formulario - Ventana muy ancha para máximo espacio horizontal
-            this.Text = $"File Download ({_downloadList.Count} Files)";
-            this.Size = new Size(500, 550); // Mucho más ancha
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.BackColor = Color.White;
-            this.ControlBox = true; // Tool window
-            this.Padding = new Padding(10); // Padding generoso
-
-            // TreeGadget - Usa todo el ancho disponible (10,10,480,380)
-            treeDownload = new TreeView()
-            {
-                Location = new Point(10, 10),
-                Size = new Size(480, 380), // Usa casi todo el ancho
-                Font = new Font("Arial", 9),
-                Scrollable = true,
-                ShowPlusMinus = true,
-                ShowLines = true,
-                ShowRootLines = true,
-                FullRowSelect = true,
-                CheckBoxes = true,
-                BorderStyle = BorderStyle.FixedSingle
-            };
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(FormDownloadWindow));
+            treeDownload = new TreeView();
+            chk255Files = new CheckBox();
+            chkExpandTree = new CheckBox();
+            btnStart = new Button();
+            btnCancel = new Button();
+            btnSaveTxt = new Button();
+            SuspendLayout();
+            // 
+            // treeDownload
+            // 
+            treeDownload.Location = new Point(0, 0);
+            treeDownload.Name = "treeDownload";
+            treeDownload.Size = new Size(121, 97);
+            treeDownload.TabIndex = 0;
             treeDownload.AfterCheck += TreeDownload_AfterCheck;
-            this.Controls.Add(treeDownload);
-
-            // CheckBoxGadget #DOWNLOAD_A500MINI - Más espacio horizontal (10,395,220,25)
-            chk255Files = new CheckBox()
-            {
-                Text = "255 Files Per Folder (FAT32)",
-                Location = new Point(10, 395), // Más abajo
-                Size = new Size(220, 25), // Mucho más ancho
-                Font = new Font("Arial", 8)
-            };
-            this.Controls.Add(chk255Files);
-
-            // CheckBoxGadget #DOWNLOAD_EXPAND - Más espacio horizontal (240,395,250,25)
-            chkExpandTree = new CheckBox()
-            {
-                Text = "Expand Tree",
-                Location = new Point(240, 395), // Más a la derecha
-                Size = new Size(250, 25), // Mucho más espacio
-                Font = new Font("Arial", 8)
-            };
+            // 
+            // chk255Files
+            // 
+            chk255Files.Location = new Point(0, 0);
+            chk255Files.Name = "chk255Files";
+            chk255Files.Size = new Size(104, 24);
+            chk255Files.TabIndex = 1;
+            // 
+            // chkExpandTree
+            // 
+            chkExpandTree.Location = new Point(0, 0);
+            chkExpandTree.Name = "chkExpandTree";
+            chkExpandTree.Size = new Size(104, 24);
+            chkExpandTree.TabIndex = 2;
             chkExpandTree.CheckedChanged += ChkExpandTree_CheckedChanged;
-            this.Controls.Add(chkExpandTree);
-
-            // ButtonGadget #DOWNLOAD_YES - Espacio horizontal generoso (10,425,140,30)
-            var btnStart = new Button()
-            {
-                Text = "Start",
-                Location = new Point(10, 425), // Más abajo
-                Size = new Size(140, 30), // Mucho más ancho
-                Font = new Font("Arial", 9),
-                BackColor = Color.LightGreen,
-                DialogResult = DialogResult.OK
-            };
+            // 
+            // btnStart
+            // 
+            btnStart.Location = new Point(0, 0);
+            btnStart.Name = "btnStart";
+            btnStart.Size = new Size(75, 23);
+            btnStart.TabIndex = 3;
             btnStart.Click += BtnStart_Click;
-            this.Controls.Add(btnStart);
-
-            // ButtonGadget #DOWNLOAD_NO - Espacio horizontal generoso (160,425,140,30)
-            var btnCancel = new Button()
-            {
-                Text = "Cancel",
-                Location = new Point(160, 425), // 10px entre botones
-                Size = new Size(140, 30), // Mucho más ancho
-                Font = new Font("Arial", 9),
-                BackColor = Color.LightCoral,
-                DialogResult = DialogResult.Cancel
-            };
+            // 
+            // btnCancel
+            // 
+            btnCancel.Location = new Point(0, 0);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(75, 23);
+            btnCancel.TabIndex = 4;
             btnCancel.Click += BtnCancel_Click;
-            this.Controls.Add(btnCancel);
-
-            // ButtonGadget #DOWNLOAD_SAVE - Espacio horizontal generoso (310,425,140,30)
-            btnSaveTxt = new Button()
-            {
-                Text = "Save Text",
-                Location = new Point(310, 425), // 10px entre botones
-                Size = new Size(140, 30), // Mucho más ancho
-                Font = new Font("Arial", 9),
-                BackColor = Color.LightYellow
-            };
+            // 
+            // btnSaveTxt
+            // 
+            btnSaveTxt.Location = new Point(0, 0);
+            btnSaveTxt.Name = "btnSaveTxt";
+            btnSaveTxt.Size = new Size(75, 23);
+            btnSaveTxt.TabIndex = 5;
             btnSaveTxt.Click += BtnSaveTxt_Click;
-            this.Controls.Add(btnSaveTxt);
-
-            // Botón por defecto
-            this.AcceptButton = btnStart;
-            this.CancelButton = btnCancel;
-
-            this.ResumeLayout(false);
+            // 
+            // FormDownloadWindow
+            // 
+            AcceptButton = btnStart;
+            BackColor = Color.White;
+            CancelButton = btnCancel;
+            ClientSize = new Size(478, 494);
+            Controls.Add(treeDownload);
+            Controls.Add(chk255Files);
+            Controls.Add(chkExpandTree);
+            Controls.Add(btnStart);
+            Controls.Add(btnCancel);
+            Controls.Add(btnSaveTxt);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "FormDownloadWindow";
+            Padding = new Padding(10);
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "File Download";
+            ResumeLayout(false);
         }
 
         private TreeView treeDownload;

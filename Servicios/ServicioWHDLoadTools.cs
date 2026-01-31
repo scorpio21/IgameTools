@@ -2180,6 +2180,7 @@ namespace IgameToolsWinForms.Servicios
                                 var genre = DetermineGenreFromFileName(gameName);
                                 var language = DetermineLanguage(gameName);
                                 var subFolder = GetCarpeta0ToZ(gameName);
+                                var version = DetermineVersion(gameName);
                                 
                                 _logger.LogDebug($"Procesando: {gameName} - Tipo: {gameType} - Género: {genre}");
                                 
@@ -2191,6 +2192,7 @@ namespace IgameToolsWinForms.Servicios
                                     FileSize = fileSize,
                                     FileLanguage = language,
                                     FileSubFolder = subFolder,
+                                    FileVersion = version,
                                     FileAvailable = false,
                                     FileFiltered = true
                                 };
@@ -2219,6 +2221,47 @@ namespace IgameToolsWinForms.Servicios
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error procesando archivo DAT {datFilePath}");
+            }
+        }
+
+        private string DetermineVersion(string gameName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(gameName))
+                    return string.Empty;
+
+                var patterns = new[]
+                {
+                    @"(?i)_v[0-9]\.[0-9][0-9](\.|_)",
+                    @"(?i)_v[0-9]\.[0-9](\.|_)",
+                    @"(?i)_v[0-9]\.[0-9][a-z](\.|_)",
+                    @"(?i)_v[0-9]\.[0-9][a-z][0-9](\.|_)",
+                    @"(?i)_v[0-9]\.[0-9]-[a-z](\.|_)",
+                    @"(?i)_v[0-9]\.[0-9][0-9][a-z](\.|_)"
+                };
+
+                foreach (var pattern in patterns)
+                {
+                    var matches = Regex.Matches(gameName, pattern);
+                    if (matches.Count <= 0)
+                        continue;
+
+                    var matchValue = matches[matches.Count - 1].Value;
+                    var value = matchValue.Replace("_", string.Empty, StringComparison.Ordinal);
+
+                    if (value.EndsWith(".", StringComparison.Ordinal))
+                        value = value.TrimEnd('.');
+
+                    return value;
+                }
+
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Error en DetermineVersion");
+                return string.Empty;
             }
         }
 

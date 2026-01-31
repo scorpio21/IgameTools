@@ -92,6 +92,11 @@ namespace IgameToolsWinForms
             _txt.ScrollToCaret();
         }
 
+        private void InitializeComponent()
+        {
+
+        }
+
         public void Limpiar()
         {
             if (IsDisposed)

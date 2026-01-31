@@ -44,11 +44,11 @@ namespace IgameToolsWinForms
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormWHDLoadTools));
             lstMain = new ListBox();
             statusBar = new StatusStrip();
-            lblStatus = new ToolStripStatusLabel();
-            lblSystem = new ToolStripStatusLabel();
             lblChipset = new ToolStripStatusLabel();
+            lblSystem = new ToolStripStatusLabel();
             lblTVSystem = new ToolStripStatusLabel();
             lblLanguage = new ToolStripStatusLabel();
             lblType = new ToolStripStatusLabel();
@@ -223,31 +223,24 @@ namespace IgameToolsWinForms
             // statusBar
             // 
             statusBar.ImageScalingSize = new Size(24, 24);
-            statusBar.Items.AddRange(new ToolStripItem[] { lblStatus, lblSystem, lblChipset, lblTVSystem, lblLanguage, lblType, lblStatusInfo, lblSize, lblVersion, toolStripStatusLabel1, toolStripStatusLabel2 });
+            statusBar.Items.AddRange(new ToolStripItem[] { lblChipset, lblSystem, lblTVSystem, lblLanguage, lblType, lblStatusInfo, lblSize, lblVersion, toolStripStatusLabel1, toolStripStatusLabel2 });
             statusBar.Location = new Point(0, 1010);
             statusBar.Name = "statusBar";
             statusBar.Padding = new Padding(1, 0, 20, 0);
             statusBar.Size = new Size(1353, 32);
             statusBar.TabIndex = 0;
             // 
-            // lblStatus
+            // lblChipset
             // 
-            lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(429, 25);
-            lblStatus.Spring = true;
-            lblStatus.TextAlign = ContentAlignment.MiddleLeft;
+            lblChipset.Name = "lblChipset";
+            lblChipset.Size = new Size(71, 25);
+            lblChipset.Text = "Chipset";
             // 
             // lblSystem
             // 
             lblSystem.Name = "lblSystem";
             lblSystem.Size = new Size(69, 25);
             lblSystem.Text = "System";
-            // 
-            // lblChipset
-            // 
-            lblChipset.Name = "lblChipset";
-            lblChipset.Size = new Size(71, 25);
-            lblChipset.Text = "Chipset";
             // 
             // lblTVSystem
             // 
@@ -1697,7 +1690,6 @@ namespace IgameToolsWinForms
             // cmbLanguageSplit
             // 
             cmbLanguageSplit.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbLanguageSplit.Enabled = true;
             cmbLanguageSplit.Items.AddRange(new object[] { "Ignore Languages", "Split Languages" });
             cmbLanguageSplit.Location = new Point(279, 22);
             cmbLanguageSplit.Margin = new Padding(4, 5, 4, 5);
@@ -1911,6 +1903,7 @@ namespace IgameToolsWinForms
             Controls.Add(btnSetPath);
             Controls.Add(btnOpenPath);
             Controls.Add(btnResetFilter);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4, 5, 4, 5);
             Name = "FormWHDLoadTools";
             StartPosition = FormStartPosition.CenterScreen;
@@ -1952,7 +1945,6 @@ namespace IgameToolsWinForms
         // Declaración de controles
         private System.Windows.Forms.ListBox lstMain;
         private System.Windows.Forms.StatusStrip statusBar;
-        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.ToolStripStatusLabel lblSystem;
         private System.Windows.Forms.ToolStripStatusLabel lblChipset;
         private System.Windows.Forms.ToolStripStatusLabel lblTVSystem;
