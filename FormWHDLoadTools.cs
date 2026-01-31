@@ -25,6 +25,9 @@ namespace IgameToolsWinForms
         private ToolTip? _toolTip;
         private ContextMenuStrip? _menuLista;
 
+        private string? _rutaUltimaLista;
+        private bool _listaEditadaActiva;
+
         public FormWHDLoadTools(ServicioWHDLoadTools servicio, ILogger<FormWHDLoadTools> logger)
         {
             try
@@ -44,6 +47,7 @@ namespace IgameToolsWinForms
                 ConfigurarTooltips();
                 ConfigurarMenuContextualLista();
                 ConfigurarBarraEstado();
+                ConfigurarBotonesOriginal();
             }
             catch (Exception ex)
             {
@@ -215,6 +219,88 @@ namespace IgameToolsWinForms
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
+        private string ObtenerDirectorioListasPorDefecto()
+        {
+            try
+            {
+                var baseDir = _servicio.Settings.WhdFolder;
+                if (string.IsNullOrWhiteSpace(baseDir))
+                {
+                    return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                }
+
+                var carpeta = Path.Combine(baseDir, "Lists");
+                Directory.CreateDirectory(carpeta);
+                return carpeta;
+            }
+            catch
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+        }
+
+        private string ObtenerDirectorioInicialParaListas()
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_rutaUltimaLista))
+                {
+                    var dir = Path.GetDirectoryName(_rutaUltimaLista);
+                    if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir))
+                    {
+                        return dir;
+                    }
+                }
+
+                return ObtenerDirectorioListasPorDefecto();
+            }
+            catch
+            {
+                return ObtenerDirectorioListasPorDefecto();
+            }
+        }
+
+        private Task<string?> SeleccionarArchivoGuardarAsync(string titulo, string filtro, string? nombrePorDefecto)
+        {
+            return EjecutarEnHiloStaAsync(() =>
+            {
+                try
+                {
+                    using var dialogo = new SaveFileDialog();
+                    dialogo.Title = titulo;
+                    dialogo.Filter = filtro;
+                    dialogo.InitialDirectory = ObtenerDirectorioInicialParaListas();
+                    if (!string.IsNullOrWhiteSpace(nombrePorDefecto))
+                    {
+                        dialogo.FileName = nombrePorDefecto;
+                    }
+
+                    var resultado = dialogo.ShowDialog();
+                    return resultado == DialogResult.OK ? dialogo.FileName : null;
+                }
+                catch (Exception ex)
+                {
+                    return (string?)$"__ERROR__:{ex.Message}";
+                }
+            }).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    EscribirLogDebug($"SeleccionarArchivoGuardarAsync ERROR: {t.Exception?.GetBaseException().Message}");
+                    return (string?)null;
+                }
+
+                var valor = t.Result;
+                if (!string.IsNullOrWhiteSpace(valor) && valor.StartsWith("__ERROR__:", StringComparison.Ordinal))
+                {
+                    EscribirLogDebug($"SeleccionarArchivoGuardarAsync ERROR: {valor}");
+                    return (string?)null;
+                }
+
+                return valor;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
         private Task<string?> SeleccionarArchivoAsync(string titulo, string filtro)
         {
             return EjecutarEnHiloStaAsync(() =>
@@ -224,6 +310,7 @@ namespace IgameToolsWinForms
                     using var dialogo = new OpenFileDialog();
                     dialogo.Title = titulo;
                     dialogo.Filter = filtro;
+                    dialogo.InitialDirectory = ObtenerDirectorioInicialParaListas();
                     var resultado = dialogo.ShowDialog();
                     return resultado == DialogResult.OK ? dialogo.FileName : null;
                 }
@@ -284,13 +371,13 @@ namespace IgameToolsWinForms
             // Botones principales
             btnScan.Click += BtnScan_Click;
             btnDownload.Click += BtnDownload_Click;
-            btnPreview.Click += BtnPreview_Click;
-            btnClear.Click += BtnClear_Click;
             btnMakeFolder.Click += BtnMakeFolder_Click;
 
-            // Configuración
-            btnSetPath.Click += BtnSetPath_Click;
-            btnOpenPath.Click += BtnOpenPath_Click;
+            btnEditlist.Click += BtnEditList_Click;
+            btnLoadlist.Click += BtnLoadList_Click;
+            btnSavelist.Click += BtnSaveList_Click;
+            btnAppendList.Click += BtnAppendList_Click;
+            btnClearEdit.Click += BtnClearEdits_Click;
 
             // Folder Settings (botones dentro del panel)
             btnOpenMain.Click += BtnOpenMain_Click;
@@ -417,10 +504,11 @@ namespace IgameToolsWinForms
             _toolTip.SetToolTip(cmbSortType, "Sorting Selector");
             _toolTip.SetToolTip(cmbLanguageSplit, "Languages : Ignore/Split");
 
-            _toolTip.SetToolTip(btnPreview, "Preview download list");
-            _toolTip.SetToolTip(btnClear, "Clear current selection / list");
-            _toolTip.SetToolTip(btnSetPath, "Set output folder");
-            _toolTip.SetToolTip(btnOpenPath, "Open output folder");
+            _toolTip.SetToolTip(btnEditlist, "Add/Remove files from download list");
+            _toolTip.SetToolTip(btnLoadlist, "Load edited list");
+            _toolTip.SetToolTip(btnSavelist, "Save edited list");
+            _toolTip.SetToolTip(btnAppendList, "Append saved list to current");
+            _toolTip.SetToolTip(btnClearEdit, "Clear edits from download list");
 
             _toolTip.SetToolTip(btnClearFilter, "Remove old/redundant WHDLoad files");
             _toolTip.SetToolTip(btnResetFilter, "Clear all data and reset filter");
@@ -438,6 +526,392 @@ namespace IgameToolsWinForms
             _toolTip.SetToolTip(btnOpenBetaGames, "Open Beta-Game folder");
             _toolTip.SetToolTip(btnOpenBetaDemos, "Open Beta-Demo folder");
             _toolTip.SetToolTip(btnOpenMags, "Open Magazines folder");
+        }
+
+        private void ConfigurarBotonesOriginal()
+        {
+            try
+            {
+                btnPreview.Visible = false;
+                btnClear.Visible = false;
+                btnSetPath.Visible = false;
+                btnOpenPath.Visible = false;
+
+                btnClearEdit.Enabled = false;
+                btnAppendList.Enabled = false;
+                _listaEditadaActiva = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en ConfigurarBotonesOriginal");
+            }
+        }
+
+        private void BtnLoadList_Click(object sender, EventArgs e)
+        {
+            _ = CargarListaDesdeArchivoAsync();
+        }
+
+        private void BtnAppendList_Click(object sender, EventArgs e)
+        {
+            _ = AnadirListaDesdeArchivoAsync();
+        }
+
+        private void BtnSaveList_Click(object sender, EventArgs e)
+        {
+            _ = GuardarListaAsync();
+        }
+
+        private void BtnClearEdits_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var result = MessageBox.Show(
+                    "Remove all edits and list data?",
+                    "Warning",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (result != DialogResult.Yes)
+                    return;
+
+                foreach (var game in _servicio.GameList)
+                {
+                    game.FileIgnore = false;
+                    game.FileExtra = false;
+                }
+
+                btnClearEdit.Enabled = false;
+                btnAppendList.Enabled = false;
+                _listaEditadaActiva = false;
+                _servicio.FilterList();
+                ActualizarListaJuegos();
+                ActualizarTitulo();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en BtnClearEdits_Click");
+            }
+        }
+
+        private void BtnEditList_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_servicio.GameList.Count == 0)
+                    return;
+
+                using var form = new Form
+                {
+                    Text = "Edit List",
+                    StartPosition = FormStartPosition.CenterParent,
+                    FormBorderStyle = FormBorderStyle.FixedDialog,
+                    MinimizeBox = false,
+                    MaximizeBox = false,
+                    ShowInTaskbar = false,
+                    ClientSize = new System.Drawing.Size(520, 650)
+                };
+
+                var lst = new CheckedListBox
+                {
+                    CheckOnClick = true,
+                    Dock = DockStyle.Fill,
+                    HorizontalScrollbar = true
+                };
+
+                var indicesOrdenados = Enumerable.Range(0, _servicio.GameList.Count)
+                    .OrderBy(i => _servicio.GameList[i].FileName, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                for (int i = 0; i < indicesOrdenados.Count; i++)
+                {
+                    var indiceJuego = indicesOrdenados[i];
+                    var game = _servicio.GameList[indiceJuego];
+                    var estadoMarcado = !game.FileIgnore;
+                    lst.Items.Add(game.FileName, estadoMarcado);
+                }
+
+                var panelBotones = new Panel
+                {
+                    Dock = DockStyle.Bottom,
+                    Height = 70
+                };
+
+                var btnClearChecks = new Button
+                {
+                    Text = "Clear Checks",
+                    Width = 120,
+                    Height = 35,
+                    Left = 25,
+                    Top = 15
+                };
+
+                var btnUpdate = new Button
+                {
+                    Text = "Update List",
+                    Width = 120,
+                    Height = 35,
+                    Left = 200,
+                    Top = 15,
+                    Enabled = false
+                };
+
+                var btnCancel = new Button
+                {
+                    Text = "Cancel",
+                    Width = 120,
+                    Height = 35,
+                    Left = 375,
+                    Top = 15
+                };
+
+                bool checkAll = true;
+                lst.ItemCheck += (_, _) => btnUpdate.Enabled = true;
+
+                btnCancel.Click += (_, _) =>
+                {
+                    form.DialogResult = DialogResult.Cancel;
+                    form.Close();
+                };
+
+                btnClearChecks.Click += (_, _) =>
+                {
+                    btnUpdate.Enabled = true;
+                    form.SuspendLayout();
+                    checkAll = !checkAll;
+                    btnClearChecks.Text = checkAll ? "Clear Checks" : "Check All";
+                    for (int i = 0; i < lst.Items.Count; i++)
+                    {
+                        lst.SetItemChecked(i, checkAll);
+                    }
+                    form.ResumeLayout();
+                };
+
+                btnUpdate.Click += (_, _) =>
+                {
+                    var result = MessageBox.Show(
+                        "Make changes to main list?",
+                        "Warning",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Warning);
+
+                    if (result == DialogResult.Cancel)
+                        return;
+                    if (result == DialogResult.No)
+                    {
+                        form.DialogResult = DialogResult.Cancel;
+                        form.Close();
+                        return;
+                    }
+
+                    for (int i = 0; i < indicesOrdenados.Count; i++)
+                    {
+                        var indiceJuego = indicesOrdenados[i];
+                        var game = _servicio.GameList[indiceJuego];
+
+                        game.FileExtra = false;
+                        if (lst.GetItemChecked(i))
+                        {
+                            game.FileIgnore = false;
+                            if (game.FileFiltered)
+                                game.FileExtra = true;
+                        }
+                        else
+                        {
+                            game.FileIgnore = true;
+                        }
+                    }
+
+                    btnClearEdit.Enabled = true;
+                    btnAppendList.Enabled = true;
+                    _listaEditadaActiva = true;
+                    _servicio.FilterList();
+                    ActualizarListaJuegos();
+                    ActualizarTitulo();
+
+                    form.DialogResult = DialogResult.OK;
+                    form.Close();
+                };
+
+                panelBotones.Controls.Add(btnClearChecks);
+                panelBotones.Controls.Add(btnUpdate);
+                panelBotones.Controls.Add(btnCancel);
+
+                form.Controls.Add(lst);
+                form.Controls.Add(panelBotones);
+                form.AcceptButton = btnUpdate;
+                form.CancelButton = btnCancel;
+
+                form.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en BtnEditList_Click");
+            }
+        }
+
+        private async Task CargarListaDesdeArchivoAsync()
+        {
+            try
+            {
+                if (_servicio.GameList.Count == 0)
+                    return;
+
+                if (_servicio.CheckFilter())
+                {
+                    var result = MessageBox.Show(
+                        "This will reset all filters. Continue?",
+                        "Warning",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning);
+
+                    if (result == DialogResult.No)
+                        return;
+                }
+
+                _servicio.SetFilter(true);
+                ActualizarFiltrosHaciaInterfaz();
+                _servicio.FilterList();
+                ActualizarListaJuegos();
+                ActualizarTitulo();
+
+                var archivo = await SeleccionarArchivoAsync(
+                    "Load List File",
+                    "List File (*.lst)|*.lst");
+
+                if (string.IsNullOrWhiteSpace(archivo))
+                    return;
+
+                _rutaUltimaLista = archivo;
+                _listaEditadaActiva = true;
+
+                var lineas = await File.ReadAllLinesAsync(archivo);
+                var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var linea in lineas)
+                {
+                    if (string.IsNullOrWhiteSpace(linea))
+                        continue;
+                    if (linea.StartsWith(";", StringComparison.Ordinal))
+                        continue;
+                    set.Add(linea.Trim());
+                }
+
+                foreach (var game in _servicio.GameList)
+                {
+                    game.FileIgnore = true;
+                    game.FileExtra = false;
+                }
+
+                foreach (var game in _servicio.GameList)
+                {
+                    if (set.Contains(game.FileName))
+                    {
+                        game.FileIgnore = false;
+                    }
+                }
+
+                btnClearEdit.Enabled = true;
+                btnAppendList.Enabled = true;
+                _servicio.FilterList();
+                ActualizarListaJuegos();
+                ActualizarTitulo();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en CargarListaDesdeArchivoAsync");
+            }
+        }
+
+        private async Task AnadirListaDesdeArchivoAsync()
+        {
+            try
+            {
+                if (_servicio.GameList.Count == 0)
+                    return;
+
+                if (!_listaEditadaActiva)
+                    return;
+
+                var archivo = await SeleccionarArchivoAsync(
+                    "Append List File",
+                    "List File (*.lst)|*.lst");
+
+                if (string.IsNullOrWhiteSpace(archivo))
+                    return;
+
+                _rutaUltimaLista = archivo;
+
+                var lineas = await File.ReadAllLinesAsync(archivo);
+                var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var linea in lineas)
+                {
+                    if (string.IsNullOrWhiteSpace(linea))
+                        continue;
+                    if (linea.StartsWith(";", StringComparison.Ordinal))
+                        continue;
+                    set.Add(linea.Trim());
+                }
+
+                foreach (var game in _servicio.GameList)
+                {
+                    if (set.Contains(game.FileName))
+                    {
+                        game.FileIgnore = false;
+                    }
+                }
+
+                btnClearEdit.Enabled = true;
+                btnAppendList.Enabled = true;
+                _servicio.FilterList();
+                ActualizarListaJuegos();
+                ActualizarTitulo();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en AnadirListaDesdeArchivoAsync");
+            }
+        }
+
+        private async Task GuardarListaAsync()
+        {
+            try
+            {
+                if (_servicio.GameList.Count == 0)
+                    return;
+
+                var archivo = await SeleccionarArchivoGuardarAsync(
+                    "Save List File",
+                    "List File (*.lst)|*.lst",
+                    "list.lst");
+
+                if (string.IsNullOrWhiteSpace(archivo))
+                    return;
+
+                if (!archivo.EndsWith(".lst", StringComparison.OrdinalIgnoreCase))
+                    archivo += ".lst";
+
+                _rutaUltimaLista = archivo;
+
+                var salida = new List<string>();
+                foreach (var index in _servicio.FilteredList)
+                {
+                    if (index < 0 || index >= _servicio.GameList.Count)
+                        continue;
+
+                    var game = _servicio.GameList[index];
+                    if (game.FileIgnore)
+                        continue;
+
+                    salida.Add(game.FileName);
+                }
+
+                await File.WriteAllLinesAsync(archivo, salida);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en GuardarListaAsync");
+                MessageBox.Show($"Error saving list: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void ConfigurarMenuContextualLista()
@@ -862,22 +1336,22 @@ namespace IgameToolsWinForms
                     ActualizarListaJuegos();
                     ActualizarTitulo();
 
-                 /*   lblStatus.Text = string.Empty;
-                    MessageBox.Show($"Escaneo completado. {_servicio.GameList.Count} juegos encontrados.",
-                                  "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);*/
+                    /*   lblStatus.Text = string.Empty;
+                       MessageBox.Show($"Escaneo completado. {_servicio.GameList.Count} juegos encontrados.",
+                                     "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);*/
                 }
                 else
                 {
-                   /* lblStatus.Text = "Error en el escaneo";
-                    MessageBox.Show("Error durante el escaneo. Revise el log para más detalles.",
-                                  "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
+                    /* lblStatus.Text = "Error en el escaneo";
+                     MessageBox.Show("Error durante el escaneo. Revise el log para más detalles.",
+                                   "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
                 }
             }
             catch (Exception ex)
             {
-             /*   _logger.LogError(ex, "Error en BtnScan_Click");
-                lblStatus.Text = "Error";
-                MessageBox.Show($"Error durante el escaneo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
+                /*   _logger.LogError(ex, "Error en BtnScan_Click");
+                   lblStatus.Text = "Error";
+                   MessageBox.Show($"Error durante el escaneo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
             }
             finally
             {
@@ -1347,8 +1821,8 @@ namespace IgameToolsWinForms
                     lstMain.Items.AddRange(items);
                 }
 
-               /* lblStatus.Text = $"Mostrando {_servicio.FilteredList.Count} de {_servicio.GameList.Count} juegos";
-                EscribirLogDebug($"ActualizarListaJuegos OK items={lstMain.Items.Count}");*/
+                /* lblStatus.Text = $"Mostrando {_servicio.FilteredList.Count} de {_servicio.GameList.Count} juegos";
+                 EscribirLogDebug($"ActualizarListaJuegos OK items={lstMain.Items.Count}");*/
             }
             catch (Exception ex)
             {
@@ -2224,6 +2698,9 @@ namespace IgameToolsWinForms
             }
         }
 
+        private void btnClear_Click_1(object sender, EventArgs e)
+        {
 
+        }
     }
 }

@@ -1909,6 +1909,9 @@ namespace IgameToolsWinForms.Servicios
                 {
                     var game = _gameList[index];
 
+                    if (game.FileIgnore)
+                        continue;
+
                     var carpeta0toZ = !string.IsNullOrWhiteSpace(game.FileSubFolder)
                         ? game.FileSubFolder
                         : GetCarpeta0ToZ(game.FileName);
@@ -1929,6 +1932,37 @@ namespace IgameToolsWinForms.Servicios
                     
                     downloadList.Add(downData);
                 }
+            }
+
+            for (int index = 0; index < _gameList.Count; index++)
+            {
+                var game = _gameList[index];
+                if (!game.FileExtra)
+                    continue;
+                if (game.FileIgnore)
+                    continue;
+                if (_filteredList.Contains(index))
+                    continue;
+
+                var carpeta0toZ = !string.IsNullOrWhiteSpace(game.FileSubFolder)
+                    ? game.FileSubFolder
+                    : GetCarpeta0ToZ(game.FileName);
+
+                var downData = new DownData
+                {
+                    DownName = game.FileName,
+                    DownType = game.FileType,
+                    DownIndex = index,
+                    DownCrc = game.FileCrc,
+                    DownGenre = game.FileGenre,
+                    DownSize = game.FileSize,
+                    DownFtpFolder = $"{_settings.FtpFolder}/{GetFolderForType(game)}/{carpeta0toZ}",
+                    DownHttpFolder = CombinarUrl(_settings.HttpServer, $"{GetFolderForType(game)}/{carpeta0toZ}"),
+                    DownPath = Path.Combine(GetSubFolderForType(game), game.FileName),
+                    Down0toZ = carpeta0toZ
+                };
+
+                downloadList.Add(downData);
             }
             
             return downloadList;

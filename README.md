@@ -38,6 +38,12 @@ Al iniciar no carga ningún archivo automáticamente. Usa el botón **Load CSV**
 - **Búsqueda Avanzada**: búsqueda avanzada con múltiples filtros y atajos (Ctrl+F).
 - **WHDLoad Tools**: herramienta integrada para descargar y gestionar archivos WHDLoad (juegos de Amiga) desde servidores FTP/HTTP con filtrado avanzado, vista previa de descargas y organización de carpetas. La ventana de descarga muestra el árbol por categorías (Games/Demos/Beta/Magazines), permite seleccionar qué descargar y exportar la selección a TXT sin bloquear la interfaz. Utiliza orden alfabético por defecto (Sorting=Alphabetical).
 - **WHDLoad Tools (Prefs/Filtros)**: `default.prefs` usa formato INI compatible con el original (`[FTP]`, `[Paths]`, `[Filter]` y claves `Filter_*`). La UI de filtros está organizada por `System`, `Chipset`, `Sound` y `Language`.
+- **WHDLoad Tools (Barra de estado)**: barra inferior como en el original mostrando datos del juego seleccionado: `System`, `Chipset`, `TV System`, `Language`, `Type`, `Status`, `Size` y `Version`.
+- **WHDLoad Tools (Lists)**: implementado el sistema de listas del original con:
+  - `Edit List` (lista ordenada alfabéticamente y checks según `FileIgnore`)
+  - `Load List` / `Save List` / `Append List`
+  - `Clear Edits` (restablece `FileIgnore`/`FileExtra`)
+  - Los diálogos `.lst` abren por defecto en la carpeta `Lists` (y recuerdan la última ruta)
 - **Interfaz Responsiva**: layout optimizado sin solapamientos, ajuste automático al redimensionar ventana.
 
 Origen FTP actual: `ftp://ftp.grandis.nu/~Uploads/mrv2k/`.

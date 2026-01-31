@@ -181,7 +181,6 @@ namespace IgameToolsWinForms
             btnClear = new Button();
             btnSetPath = new Button();
             btnOpenPath = new Button();
-            btnResetFilter = new Button();
             groupMisc = new GroupBox();
             btnAbout = new Button();
             btnHelp = new Button();
@@ -190,6 +189,13 @@ namespace IgameToolsWinForms
             GroupData = new GroupBox();
             btnMakeFolder = new Button();
             btnClearFilter = new Button();
+            groupBoxList = new GroupBox();
+            btnEditlist = new Button();
+            btnLoadlist = new Button();
+            btnSavelist = new Button();
+            btnAppendList = new Button();
+            btnResetFilter = new Button();
+            btnClearEdit = new Button();
             statusBar.SuspendLayout();
             groupBoxServer.SuspendLayout();
             panelServerScroll.SuspendLayout();
@@ -207,6 +213,7 @@ namespace IgameToolsWinForms
             groupBoxActions.SuspendLayout();
             groupMisc.SuspendLayout();
             GroupData.SuspendLayout();
+            groupBoxList.SuspendLayout();
             SuspendLayout();
             // 
             // lstMain
@@ -1703,11 +1710,11 @@ namespace IgameToolsWinForms
             groupBoxActions.Controls.Add(btnScan);
             groupBoxActions.Controls.Add(btnDownload);
             groupBoxActions.Controls.Add(cmbDownloadType);
-            groupBoxActions.Location = new Point(1209, 14);
+            groupBoxActions.Location = new Point(1177, 14);
             groupBoxActions.Margin = new Padding(4, 5, 4, 5);
             groupBoxActions.Name = "groupBoxActions";
             groupBoxActions.Padding = new Padding(4, 5, 4, 5);
-            groupBoxActions.Size = new Size(129, 200);
+            groupBoxActions.Size = new Size(129, 174);
             groupBoxActions.TabIndex = 5;
             groupBoxActions.TabStop = false;
             groupBoxActions.Text = "FTP Actions";
@@ -1724,7 +1731,7 @@ namespace IgameToolsWinForms
             // 
             // btnDownload
             // 
-            btnDownload.Location = new Point(7, 92);
+            btnDownload.Location = new Point(7, 80);
             btnDownload.Margin = new Padding(4, 5, 4, 5);
             btnDownload.Name = "btnDownload";
             btnDownload.Size = new Size(118, 36);
@@ -1736,7 +1743,7 @@ namespace IgameToolsWinForms
             // 
             cmbDownloadType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbDownloadType.Items.AddRange(new object[] { "FTP", "HTTP" });
-            cmbDownloadType.Location = new Point(7, 150);
+            cmbDownloadType.Location = new Point(7, 126);
             cmbDownloadType.Margin = new Padding(4, 5, 4, 5);
             cmbDownloadType.Name = "cmbDownloadType";
             cmbDownloadType.Size = new Size(118, 33);
@@ -1745,7 +1752,7 @@ namespace IgameToolsWinForms
             // btnPreview
             // 
             btnPreview.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnPreview.Location = new Point(1217, 217);
+            btnPreview.Location = new Point(1182, 933);
             btnPreview.Margin = new Padding(4, 5, 4, 5);
             btnPreview.Name = "btnPreview";
             btnPreview.Size = new Size(118, 36);
@@ -1756,18 +1763,19 @@ namespace IgameToolsWinForms
             // btnClear
             // 
             btnClear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnClear.Location = new Point(1217, 275);
+            btnClear.Location = new Point(1182, 816);
             btnClear.Margin = new Padding(4, 5, 4, 5);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(118, 36);
             btnClear.TabIndex = 7;
             btnClear.Text = "Clear";
             btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += btnClear_Click_1;
             // 
             // btnSetPath
             // 
             btnSetPath.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnSetPath.Location = new Point(1217, 392);
+            btnSetPath.Location = new Point(1182, 855);
             btnSetPath.Margin = new Padding(4, 5, 4, 5);
             btnSetPath.Name = "btnSetPath";
             btnSetPath.Size = new Size(118, 36);
@@ -1778,7 +1786,7 @@ namespace IgameToolsWinForms
             // btnOpenPath
             // 
             btnOpenPath.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnOpenPath.Location = new Point(1217, 450);
+            btnOpenPath.Location = new Point(1182, 892);
             btnOpenPath.Margin = new Padding(4, 5, 4, 5);
             btnOpenPath.Name = "btnOpenPath";
             btnOpenPath.Size = new Size(118, 36);
@@ -1786,24 +1794,13 @@ namespace IgameToolsWinForms
             btnOpenPath.Text = "Open Path";
             btnOpenPath.UseVisualStyleBackColor = true;
             // 
-            // btnResetFilter
-            // 
-            btnResetFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnResetFilter.Location = new Point(1217, 567);
-            btnResetFilter.Margin = new Padding(4, 5, 4, 5);
-            btnResetFilter.Name = "btnResetFilter";
-            btnResetFilter.Size = new Size(118, 36);
-            btnResetFilter.TabIndex = 12;
-            btnResetFilter.Text = "Clear Data";
-            btnResetFilter.UseVisualStyleBackColor = true;
-            // 
             // groupMisc
             // 
             groupMisc.Controls.Add(btnAbout);
             groupMisc.Controls.Add(btnHelp);
             groupMisc.Controls.Add(btnSavePrefs);
             groupMisc.Controls.Add(btnLoadPrefs);
-            groupMisc.Location = new Point(1200, 776);
+            groupMisc.Location = new Point(1177, 598);
             groupMisc.Name = "groupMisc";
             groupMisc.Size = new Size(136, 210);
             groupMisc.TabIndex = 15;
@@ -1852,9 +1849,10 @@ namespace IgameToolsWinForms
             // 
             // GroupData
             // 
+            GroupData.Controls.Add(btnResetFilter);
             GroupData.Controls.Add(btnMakeFolder);
             GroupData.Controls.Add(btnClearFilter);
-            GroupData.Location = new Point(1200, 620);
+            GroupData.Location = new Point(1177, 436);
             GroupData.Name = "GroupData";
             GroupData.Size = new Size(135, 150);
             GroupData.TabIndex = 16;
@@ -1884,11 +1882,92 @@ namespace IgameToolsWinForms
             btnClearFilter.Text = "Clean Files";
             btnClearFilter.UseVisualStyleBackColor = true;
             // 
+            // groupBoxList
+            // 
+            groupBoxList.Controls.Add(btnClearEdit);
+            groupBoxList.Controls.Add(btnAppendList);
+            groupBoxList.Controls.Add(btnSavelist);
+            groupBoxList.Controls.Add(btnLoadlist);
+            groupBoxList.Controls.Add(btnEditlist);
+            groupBoxList.Location = new Point(1177, 196);
+            groupBoxList.Name = "groupBoxList";
+            groupBoxList.Size = new Size(129, 234);
+            groupBoxList.TabIndex = 17;
+            groupBoxList.TabStop = false;
+            groupBoxList.Text = "Lists";
+            // 
+            // btnEditlist
+            // 
+            btnEditlist.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnEditlist.Location = new Point(7, 22);
+            btnEditlist.Margin = new Padding(4, 5, 4, 5);
+            btnEditlist.Name = "btnEditlist";
+            btnEditlist.Size = new Size(118, 36);
+            btnEditlist.TabIndex = 13;
+            btnEditlist.Text = "Edit list";
+            btnEditlist.UseVisualStyleBackColor = true;
+            // 
+            // btnLoadlist
+            // 
+            btnLoadlist.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLoadlist.Location = new Point(7, 66);
+            btnLoadlist.Margin = new Padding(4, 5, 4, 5);
+            btnLoadlist.Name = "btnLoadlist";
+            btnLoadlist.Size = new Size(118, 36);
+            btnLoadlist.TabIndex = 14;
+            btnLoadlist.Text = "Load list";
+            btnLoadlist.UseVisualStyleBackColor = true;
+            // 
+            // btnSavelist
+            // 
+            btnSavelist.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSavelist.Location = new Point(7, 110);
+            btnSavelist.Margin = new Padding(4, 5, 4, 5);
+            btnSavelist.Name = "btnSavelist";
+            btnSavelist.Size = new Size(118, 36);
+            btnSavelist.TabIndex = 15;
+            btnSavelist.Text = "Save list";
+            btnSavelist.UseVisualStyleBackColor = true;
+            // 
+            // btnAppendList
+            // 
+            btnAppendList.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnAppendList.Location = new Point(7, 153);
+            btnAppendList.Margin = new Padding(4, 5, 4, 5);
+            btnAppendList.Name = "btnAppendList";
+            btnAppendList.Size = new Size(118, 36);
+            btnAppendList.TabIndex = 16;
+            btnAppendList.Text = "Append list";
+            btnAppendList.UseVisualStyleBackColor = true;
+            // 
+            // btnResetFilter
+            // 
+            btnResetFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnResetFilter.Location = new Point(8, 68);
+            btnResetFilter.Margin = new Padding(4, 5, 4, 5);
+            btnResetFilter.Name = "btnResetFilter";
+            btnResetFilter.Size = new Size(118, 36);
+            btnResetFilter.TabIndex = 14;
+            btnResetFilter.Text = "Clear Data";
+            btnResetFilter.UseVisualStyleBackColor = true;
+            // 
+            // btnClearEdit
+            // 
+            btnClearEdit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnClearEdit.Location = new Point(7, 192);
+            btnClearEdit.Margin = new Padding(4, 5, 4, 5);
+            btnClearEdit.Name = "btnClearEdit";
+            btnClearEdit.Size = new Size(118, 36);
+            btnClearEdit.TabIndex = 17;
+            btnClearEdit.Text = "Clear Edit";
+            btnClearEdit.UseVisualStyleBackColor = true;
+            // 
             // FormWHDLoadTools
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1353, 1042);
+            Controls.Add(groupBoxList);
             Controls.Add(GroupData);
             Controls.Add(groupMisc);
             Controls.Add(lstMain);
@@ -1902,7 +1981,6 @@ namespace IgameToolsWinForms
             Controls.Add(btnClear);
             Controls.Add(btnSetPath);
             Controls.Add(btnOpenPath);
-            Controls.Add(btnResetFilter);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4, 5, 4, 5);
             Name = "FormWHDLoadTools";
@@ -1936,6 +2014,7 @@ namespace IgameToolsWinForms
             groupBoxActions.ResumeLayout(false);
             groupMisc.ResumeLayout(false);
             GroupData.ResumeLayout(false);
+            groupBoxList.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -2015,7 +2094,6 @@ namespace IgameToolsWinForms
         private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.Button btnSetPath;
         private System.Windows.Forms.Button btnOpenPath;
-        private System.Windows.Forms.Button btnResetFilter;
         private GroupBox groupMisc;
         private Button btnAbout;
         private Button btnHelp;
@@ -2077,6 +2155,13 @@ namespace IgameToolsWinForms
         private CheckBox chk1Disk;
         private CheckBox chkImage;
         private CheckBox chkFiles;
+        private GroupBox groupBoxList;
+        private Button btnEditlist;
+        private Button btnSavelist;
+        private Button btnLoadlist;
+        private Button btnAppendList;
+        private Button btnResetFilter;
+        private Button btnClearEdit;
 
         // Los demás controles se agregarán en las siguientes partes...
     }
