@@ -27,6 +27,7 @@ namespace IgameToolsWinForms
 
         private string? _rutaUltimaLista;
         private bool _listaEditadaActiva;
+        private bool _listaCargadaDesdeArchivo;
 
         public FormWHDLoadTools(ServicioWHDLoadTools servicio, ILogger<FormWHDLoadTools> logger)
         {
@@ -540,6 +541,7 @@ namespace IgameToolsWinForms
                 btnClearEdit.Enabled = false;
                 btnAppendList.Enabled = false;
                 _listaEditadaActiva = false;
+                _listaCargadaDesdeArchivo = false;
             }
             catch (Exception ex)
             {
@@ -584,6 +586,7 @@ namespace IgameToolsWinForms
                 btnClearEdit.Enabled = false;
                 btnAppendList.Enabled = false;
                 _listaEditadaActiva = false;
+                _listaCargadaDesdeArchivo = false;
                 _servicio.FilterList();
                 ActualizarListaJuegos();
                 ActualizarTitulo();
@@ -722,8 +725,8 @@ namespace IgameToolsWinForms
                         }
                     }
 
-                    btnClearEdit.Enabled = true;
-                    btnAppendList.Enabled = true;
+                    btnClearEdit.Enabled = _listaCargadaDesdeArchivo;
+                    btnAppendList.Enabled = _listaCargadaDesdeArchivo;
                     _listaEditadaActiva = true;
                     _servicio.FilterList();
                     ActualizarListaJuegos();
@@ -784,6 +787,7 @@ namespace IgameToolsWinForms
 
                 _rutaUltimaLista = archivo;
                 _listaEditadaActiva = true;
+                _listaCargadaDesdeArchivo = true;
 
                 var lineas = await File.ReadAllLinesAsync(archivo);
                 var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -829,7 +833,7 @@ namespace IgameToolsWinForms
                 if (_servicio.GameList.Count == 0)
                     return;
 
-                if (!_listaEditadaActiva)
+                if (!_listaCargadaDesdeArchivo)
                     return;
 
                 var archivo = await SeleccionarArchivoAsync(
