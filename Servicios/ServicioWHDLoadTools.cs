@@ -1934,6 +1934,34 @@ namespace IgameToolsWinForms.Servicios
             return downloadList;
         }
 
+        public DownData? CrearDownDataParaIndice(int index)
+        {
+            if (index < 0 || index >= _gameList.Count)
+                return null;
+
+            var game = _gameList[index];
+
+            var carpeta0toZ = !string.IsNullOrWhiteSpace(game.FileSubFolder)
+                ? game.FileSubFolder
+                : GetCarpeta0ToZ(game.FileName);
+
+            var downData = new DownData
+            {
+                DownName = game.FileName,
+                DownType = game.FileType,
+                DownIndex = index,
+                DownCrc = game.FileCrc,
+                DownGenre = game.FileGenre,
+                DownSize = game.FileSize,
+                DownFtpFolder = $"{_settings.FtpFolder}/{GetFolderForType(game)}/{carpeta0toZ}",
+                DownHttpFolder = CombinarUrl(_settings.HttpServer, $"{GetFolderForType(game)}/{carpeta0toZ}"),
+                DownPath = Path.Combine(GetSubFolderForType(game), game.FileName),
+                Down0toZ = carpeta0toZ
+            };
+
+            return downData;
+        }
+
         private static string CombinarUrl(string baseUrl, string rutaRelativa)
         {
             if (string.IsNullOrWhiteSpace(baseUrl))

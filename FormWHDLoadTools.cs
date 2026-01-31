@@ -22,6 +22,9 @@ namespace IgameToolsWinForms
         private readonly string _rutaLogDebug;
         private readonly string _archivoLogDebug;
 
+        private ToolTip? _toolTip;
+        private ContextMenuStrip? _menuLista;
+
         public FormWHDLoadTools(ServicioWHDLoadTools servicio, ILogger<FormWHDLoadTools> logger)
         {
             try
@@ -38,6 +41,9 @@ namespace IgameToolsWinForms
 
                 ConfigurarEventos();
                 CargarConfiguracionPorDefecto();
+                ConfigurarTooltips();
+                ConfigurarMenuContextualLista();
+                ConfigurarBarraEstado();
             }
             catch (Exception ex)
             {
@@ -389,6 +395,189 @@ namespace IgameToolsWinForms
             chkCensored.CheckedChanged += Filter_CheckedChanged;
         }
 
+        private void ConfigurarTooltips()
+        {
+            _toolTip = new ToolTip
+            {
+                ShowAlways = true,
+                AutomaticDelay = 200,
+                AutoPopDelay = 5000,
+                InitialDelay = 200,
+                ReshowDelay = 100
+            };
+
+            _toolTip.SetToolTip(btnLang, "Clear Language Panel");
+            _toolTip.SetToolTip(btnCleaLan, "Clear Filter");
+            _toolTip.SetToolTip(btnResetLang, "Reset Filter");
+
+            _toolTip.SetToolTip(btnScan, "Load Dat Files");
+            _toolTip.SetToolTip(btnDownload, "Download WHDLoad files");
+            _toolTip.SetToolTip(cmbDownloadType, "Server Connection Type Selector");
+
+            _toolTip.SetToolTip(cmbSortType, "Sorting Selector");
+            _toolTip.SetToolTip(cmbLanguageSplit, "Languages : Ignore/Split");
+
+            _toolTip.SetToolTip(btnPreview, "Preview download list");
+            _toolTip.SetToolTip(btnClear, "Clear current selection / list");
+            _toolTip.SetToolTip(btnSetPath, "Set output folder");
+            _toolTip.SetToolTip(btnOpenPath, "Open output folder");
+
+            _toolTip.SetToolTip(btnClearFilter, "Remove old/redundant WHDLoad files");
+            _toolTip.SetToolTip(btnResetFilter, "Clear all data and reset filter");
+            _toolTip.SetToolTip(btnMakeFolder, "Make new folder from downloaded files");
+
+            _toolTip.SetToolTip(btnSavePrefs, "Save current settings");
+            _toolTip.SetToolTip(btnLoadPrefs, "Load saved settings");
+            _toolTip.SetToolTip(btnHelp, "Open help window");
+            _toolTip.SetToolTip(btnAbout, "Open about window");
+
+            _toolTip.SetToolTip(btnOpenMain, "Open WHDLoad main folder");
+            _toolTip.SetToolTip(btnSetMain, "Set WHDLoad main folder");
+            _toolTip.SetToolTip(btnOpenGames, "Open Games folder");
+            _toolTip.SetToolTip(btnOpenDemos, "Open Demos folder");
+            _toolTip.SetToolTip(btnOpenBetaGames, "Open Beta-Game folder");
+            _toolTip.SetToolTip(btnOpenBetaDemos, "Open Beta-Demo folder");
+            _toolTip.SetToolTip(btnOpenMags, "Open Magazines folder");
+        }
+
+        private void ConfigurarMenuContextualLista()
+        {
+            _menuLista = new ContextMenuStrip();
+            var itemDescargar = new ToolStripMenuItem("Download this file");
+            itemDescargar.Click += async (_, _) => await DescargarSeleccionadoAsync();
+            _menuLista.Items.Add(itemDescargar);
+
+            lstMain.ContextMenuStrip = _menuLista;
+            lstMain.MouseDown += LstMain_MouseDown;
+        }
+
+        private void ConfigurarBarraEstado()
+        {
+            try
+            {
+                if (toolStripStatusLabel1 != null)
+                    toolStripStatusLabel1.Visible = false;
+                if (toolStripStatusLabel2 != null)
+                    toolStripStatusLabel2.Visible = false;
+
+                ActualizarBarraEstado(null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en ConfigurarBarraEstado");
+            }
+        }
+
+        private void ActualizarBarraEstado(GameData? game)
+        {
+            try
+            {
+                if (game == null)
+                {
+                    lblSystem.Text = "System: ?";
+                    lblChipset.Text = "Chipset: ?";
+                    lblTVSystem.Text = "TV System: ?";
+                    lblLanguage.Text = "Language: ?";
+                    lblType.Text = "Type: ?";
+                    lblStatusInfo.Text = "Status: ?";
+                    lblSize.Text = "Size: ?";
+                    lblVersion.Text = "Version: ?";
+                    return;
+                }
+
+                var sistema = "?";
+                if (game.FileAmiga) sistema = "Amiga";
+                if (game.FileCd32) sistema = "CD32";
+                if (game.FileCdtv) sistema = "CDTV";
+                if (game.FileCdrom) sistema = "CDROM";
+                if (game.FileArcadia) sistema = "Arcadia";
+
+                var chipset = game.FileAga ? "AGA" : "ECS/OCS";
+                var tv = game.FileNtsc ? "NTSC" : "PAL";
+
+                var idioma = string.IsNullOrWhiteSpace(game.FileLanguage) ? "?" : game.FileLanguage;
+
+                var tipo = game.FileBetaGame || game.FileBetaDemo
+                    ? "Beta"
+                    : (string.IsNullOrWhiteSpace(game.FileType) ? "?" : game.FileType);
+
+                var status = game.FileAvailable ? "Available" : "Missing";
+                var sizeKb = game.FileSize > 0 ? (game.FileSize / 1024) : 0;
+                var version = string.IsNullOrWhiteSpace(game.FileVersion) ? "" : game.FileVersion;
+
+                lblSystem.Text = $"System: {sistema}";
+                lblChipset.Text = $"Chipset: {chipset}";
+                lblTVSystem.Text = $"TV System: {tv}";
+                lblLanguage.Text = $"Language: {idioma}";
+                lblType.Text = $"Type: {tipo}";
+                lblStatusInfo.Text = $"Status: {status}";
+                lblSize.Text = $"Size: {sizeKb} KB";
+                lblVersion.Text = $"Version: {version}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en ActualizarBarraEstado");
+            }
+        }
+
+        private void LstMain_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            var index = lstMain.IndexFromPoint(e.Location);
+            if (index >= 0 && index < lstMain.Items.Count)
+            {
+                lstMain.SelectedIndex = index;
+            }
+        }
+
+        private async Task DescargarSeleccionadoAsync()
+        {
+            try
+            {
+                if (lstMain.SelectedIndex < 0)
+                    return;
+
+                ActualizarConfiguracionDesdeInterfaz();
+
+                var filteredIndex = lstMain.SelectedIndex;
+                if (filteredIndex < 0 || filteredIndex >= _servicio.FilteredList.Count)
+                    return;
+
+                var gameIndex = _servicio.FilteredList[filteredIndex];
+                var downData = _servicio.CrearDownDataParaIndice(gameIndex);
+                if (downData == null)
+                    return;
+
+                var seleccion = new List<DownData> { downData };
+
+                btnDownload.Enabled = false;
+                btnScan.Enabled = false;
+                lstMain.Enabled = false;
+
+                try
+                {
+                    await Task.Run(() => _servicio.DownloadFilesWithConsole(seleccion));
+                }
+                finally
+                {
+                    btnDownload.Enabled = true;
+                    btnScan.Enabled = true;
+                    lstMain.Enabled = true;
+                }
+
+                _servicio.RescanFiles();
+                ActualizarListaJuegos();
+                ActualizarTitulo();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error descargando fichero desde menú contextual");
+                MessageBox.Show($"Error al descargar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void CargarConfiguracionPorDefecto()
         {
             try
@@ -673,7 +862,7 @@ namespace IgameToolsWinForms
                     ActualizarListaJuegos();
                     ActualizarTitulo();
 
-                    lblStatus.Text = $"Escaneo completado: {_servicio.GameList.Count} juegos encontrados";
+                    lblStatus.Text = string.Empty;
                     MessageBox.Show($"Escaneo completado. {_servicio.GameList.Count} juegos encontrados.",
                                   "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -1098,7 +1287,34 @@ namespace IgameToolsWinForms
 
         private void LstGames_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Actualizar barra de estado con información del juego seleccionado
+            try
+            {
+                if (lstMain.SelectedIndex < 0)
+                {
+                    ActualizarBarraEstado(null);
+                    return;
+                }
+
+                if (lstMain.SelectedIndex >= _servicio.FilteredList.Count)
+                {
+                    ActualizarBarraEstado(null);
+                    return;
+                }
+
+                var gameIndex = _servicio.FilteredList[lstMain.SelectedIndex];
+                if (gameIndex < 0 || gameIndex >= _servicio.GameList.Count)
+                {
+                    ActualizarBarraEstado(null);
+                    return;
+                }
+
+                var game = _servicio.GameList[gameIndex];
+                ActualizarBarraEstado(game);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en LstGames_SelectedIndexChanged");
+            }
         }
 
         private void ActualizarListaJuegos()
