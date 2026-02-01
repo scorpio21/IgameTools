@@ -177,7 +177,6 @@ namespace IgameToolsWinForms
             btnScan = new Button();
             btnDownload = new Button();
             cmbDownloadType = new ComboBox();
-            btnPreview = new Button();
             btnClear = new Button();
             btnSetPath = new Button();
             btnOpenPath = new Button();
@@ -1749,17 +1748,6 @@ namespace IgameToolsWinForms
             cmbDownloadType.Size = new Size(118, 33);
             cmbDownloadType.TabIndex = 2;
             // 
-            // btnPreview
-            // 
-            btnPreview.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnPreview.Location = new Point(1182, 933);
-            btnPreview.Margin = new Padding(4, 5, 4, 5);
-            btnPreview.Name = "btnPreview";
-            btnPreview.Size = new Size(118, 36);
-            btnPreview.TabIndex = 6;
-            btnPreview.Text = "Preview";
-            btnPreview.UseVisualStyleBackColor = true;
-            // 
             // btnClear
             // 
             btnClear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -1977,7 +1965,6 @@ namespace IgameToolsWinForms
             Controls.Add(groupBoxSorting);
             Controls.Add(groupBoxFilter);
             Controls.Add(groupBoxActions);
-            Controls.Add(btnPreview);
             Controls.Add(btnClear);
             Controls.Add(btnSetPath);
             Controls.Add(btnOpenPath);
@@ -2090,7 +2077,6 @@ namespace IgameToolsWinForms
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.ComboBox cmbDownloadType;
         
-        private System.Windows.Forms.Button btnPreview;
         private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.Button btnSetPath;
         private System.Windows.Forms.Button btnOpenPath;

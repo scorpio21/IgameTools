@@ -53,49 +53,60 @@ namespace IgameToolsWinForms
             // 
             // treeDownload
             // 
-            treeDownload.Location = new Point(0, 0);
+            treeDownload.CheckBoxes = true;
+            treeDownload.Location = new Point(10, 10);
             treeDownload.Name = "treeDownload";
-            treeDownload.Size = new Size(121, 97);
+            treeDownload.Size = new Size(300, 400);
             treeDownload.TabIndex = 0;
             treeDownload.AfterCheck += TreeDownload_AfterCheck;
             // 
             // chk255Files
             // 
-            chk255Files.Location = new Point(0, 0);
+            chk255Files.Location = new Point(15, 412);
             chk255Files.Name = "chk255Files";
-            chk255Files.Size = new Size(104, 24);
+            chk255Files.Size = new Size(200, 30);
             chk255Files.TabIndex = 1;
+            chk255Files.Text = "255 Files Per Folder (FAT32)";
+            chk255Files.UseVisualStyleBackColor = true;
             // 
             // chkExpandTree
             // 
-            chkExpandTree.Location = new Point(0, 0);
+            chkExpandTree.Location = new Point(220, 412);
             chkExpandTree.Name = "chkExpandTree";
-            chkExpandTree.Size = new Size(104, 24);
+            chkExpandTree.Size = new Size(95, 30);
             chkExpandTree.TabIndex = 2;
+            chkExpandTree.Text = "Expand Tree";
+            chkExpandTree.UseVisualStyleBackColor = true;
             chkExpandTree.CheckedChanged += ChkExpandTree_CheckedChanged;
             // 
             // btnStart
             // 
-            btnStart.Location = new Point(0, 0);
+            btnStart.Location = new Point(15, 445);
             btnStart.Name = "btnStart";
-            btnStart.Size = new Size(75, 23);
+            btnStart.Size = new Size(95, 30);
             btnStart.TabIndex = 3;
+            btnStart.Text = "Start";
+            btnStart.UseVisualStyleBackColor = true;
             btnStart.Click += BtnStart_Click;
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(0, 0);
+            btnCancel.Location = new Point(115, 445);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(75, 23);
+            btnCancel.Size = new Size(95, 30);
             btnCancel.TabIndex = 4;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += BtnCancel_Click;
             // 
             // btnSaveTxt
             // 
-            btnSaveTxt.Location = new Point(0, 0);
+            btnSaveTxt.Location = new Point(215, 445);
             btnSaveTxt.Name = "btnSaveTxt";
-            btnSaveTxt.Size = new Size(75, 23);
+            btnSaveTxt.Size = new Size(90, 30);
             btnSaveTxt.TabIndex = 5;
+            btnSaveTxt.Text = "Save Text";
+            btnSaveTxt.UseVisualStyleBackColor = true;
             btnSaveTxt.Click += BtnSaveTxt_Click;
             // 
             // FormDownloadWindow
@@ -103,7 +114,7 @@ namespace IgameToolsWinForms
             AcceptButton = btnStart;
             BackColor = Color.White;
             CancelButton = btnCancel;
-            ClientSize = new Size(478, 494);
+            ClientSize = new Size(325, 485);
             Controls.Add(treeDownload);
             Controls.Add(chk255Files);
             Controls.Add(chkExpandTree);

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Compile Remove="CompileTols\**\*.cs" />
+    <Compile Remove="FormDownloadPreview.cs" />
     <None Remove="CompileTols\**\*" />
     <Content Remove="CompileTols\**\*" />
     <EmbeddedResource Remove="CompileTols\**\*" />

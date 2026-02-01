@@ -537,7 +537,6 @@ namespace IgameToolsWinForms
         {
             try
             {
-                btnPreview.Visible = false;
                 btnClear.Visible = false;
                 btnSetPath.Visible = false;
                 btnOpenPath.Visible = false;
@@ -1451,29 +1450,6 @@ namespace IgameToolsWinForms
                 _logger.LogError(ex, "Error en BtnDownload_Click");
                 MessageBox.Show($"Error al iniciar descarga: {ex.Message}",
                               "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void BtnPreview_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var downloadList = _servicio.MakeDownloadList();
-
-                if (downloadList.Count == 0)
-                {
-                    MessageBox.Show("No hay archivos para previsualizar.",
-                                  "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                using var formPreview = new FormDownloadPreview(downloadList);
-                formPreview.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error en BtnPreview_Click");
-                MessageBox.Show($"Error al mostrar vista previa: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
