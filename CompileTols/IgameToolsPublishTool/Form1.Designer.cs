@@ -22,7 +22,7 @@ partial class Form1
     private Label lblRutaIscc;
     private TextBox txtRutaIscc;
     private Button btnBuscarIscc;
-    private FlowLayoutPanel pnlAcciones;
+    private Panel pnlAcciones;
     private Button btnLimpiarPublish;
     private Button btnBuild;
     private Button btnPublish;
@@ -59,400 +59,405 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-        this.menuAyuda = new System.Windows.Forms.ToolStripMenuItem();
-        this.menuAyudaPasos = new System.Windows.Forms.ToolStripMenuItem();
-        this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-        this.grpConfiguracion = new System.Windows.Forms.GroupBox();
-        this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-        this.lblRutaProyecto = new System.Windows.Forms.Label();
-        this.txtRutaProyecto = new System.Windows.Forms.TextBox();
-        this.btnSeleccionarRutaProyecto = new System.Windows.Forms.Button();
-        this.lblVersion = new System.Windows.Forms.Label();
-        this.txtVersion = new System.Windows.Forms.TextBox();
-        this.chkLimpiarPublish = new System.Windows.Forms.CheckBox();
-        this.lblRutaIscc = new System.Windows.Forms.Label();
-        this.txtRutaIscc = new System.Windows.Forms.TextBox();
-        this.btnBuscarIscc = new System.Windows.Forms.Button();
-        this.pnlAcciones = new System.Windows.Forms.FlowLayoutPanel();
-        this.btnLimpiarPublish = new System.Windows.Forms.Button();
-        this.btnBuild = new System.Windows.Forms.Button();
-        this.btnPublish = new System.Windows.Forms.Button();
-        this.btnCopiarRecursos = new System.Windows.Forms.Button();
-        this.btnZipPortable = new System.Windows.Forms.Button();
-        this.btnZipSingleFile = new System.Windows.Forms.Button();
-        this.btnInstalador = new System.Windows.Forms.Button();
-        this.btnVerificarRecursos = new System.Windows.Forms.Button();
-        this.btnFallbackLimpieza = new System.Windows.Forms.Button();
-        this.btnEjecutarTodo = new System.Windows.Forms.Button();
-        this.btnCancelar = new System.Windows.Forms.Button();
-        this.grpLog = new System.Windows.Forms.GroupBox();
-        this.txtLog = new System.Windows.Forms.RichTextBox();
-        this.progressBar1 = new System.Windows.Forms.ProgressBar();
-        this.menuStrip1.SuspendLayout();
-        this.tableLayoutPanel1.SuspendLayout();
-        this.grpConfiguracion.SuspendLayout();
-        this.tableLayoutPanel2.SuspendLayout();
-        this.pnlAcciones.SuspendLayout();
-        this.grpLog.SuspendLayout();
-        this.SuspendLayout();
+        menuStrip1 = new MenuStrip();
+        menuAyuda = new ToolStripMenuItem();
+        menuAyudaPasos = new ToolStripMenuItem();
+        tableLayoutPanel1 = new TableLayoutPanel();
+        grpConfiguracion = new GroupBox();
+        tableLayoutPanel2 = new TableLayoutPanel();
+        txtRutaProyecto = new TextBox();
+        btnSeleccionarRutaProyecto = new Button();
+        txtVersion = new TextBox();
+        chkLimpiarPublish = new CheckBox();
+        lblRutaIscc = new Label();
+        txtRutaIscc = new TextBox();
+        btnBuscarIscc = new Button();
+        pnlAcciones = new Panel();
+        btnLimpiarPublish = new Button();
+        btnBuild = new Button();
+        btnPublish = new Button();
+        btnCopiarRecursos = new Button();
+        btnInstalador = new Button();
+        btnZipPortable = new Button();
+        btnZipSingleFile = new Button();
+        btnVerificarRecursos = new Button();
+        btnFallbackLimpieza = new Button();
+        btnEjecutarTodo = new Button();
+        btnCancelar = new Button();
+        lblVersion = new Label();
+        lblRutaProyecto = new Label();
+        grpLog = new GroupBox();
+        txtLog = new RichTextBox();
+        progressBar1 = new ProgressBar();
+        menuStrip1.SuspendLayout();
+        tableLayoutPanel1.SuspendLayout();
+        grpConfiguracion.SuspendLayout();
+        tableLayoutPanel2.SuspendLayout();
+        pnlAcciones.SuspendLayout();
+        grpLog.SuspendLayout();
+        SuspendLayout();
         // 
         // menuStrip1
         // 
-        this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-        this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-        this.menuAyuda});
-        this.menuStrip1.Location = new System.Drawing.Point(10, 10);
-        this.menuStrip1.Name = "menuStrip1";
-        this.menuStrip1.Size = new System.Drawing.Size(980, 28);
-        this.menuStrip1.TabIndex = 0;
-        this.menuStrip1.Text = "menuStrip1";
+        menuStrip1.ImageScalingSize = new Size(20, 20);
+        menuStrip1.Items.AddRange(new ToolStripItem[] { menuAyuda });
+        menuStrip1.Location = new Point(10, 10);
+        menuStrip1.Name = "menuStrip1";
+        menuStrip1.Size = new Size(980, 33);
+        menuStrip1.TabIndex = 0;
+        menuStrip1.Text = "menuStrip1";
         // 
         // menuAyuda
         // 
-        this.menuAyuda.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-        this.menuAyudaPasos});
-        this.menuAyuda.Name = "menuAyuda";
-        this.menuAyuda.Size = new System.Drawing.Size(65, 24);
-        this.menuAyuda.Text = "Ayuda";
+        menuAyuda.DropDownItems.AddRange(new ToolStripItem[] { menuAyudaPasos });
+        menuAyuda.Name = "menuAyuda";
+        menuAyuda.Size = new Size(79, 29);
+        menuAyuda.Text = "Ayuda";
         // 
         // menuAyudaPasos
         // 
-        this.menuAyudaPasos.Name = "menuAyudaPasos";
-        this.menuAyudaPasos.Size = new System.Drawing.Size(224, 26);
-        this.menuAyudaPasos.Text = "Guía paso a paso";
-        this.menuAyudaPasos.Click += new System.EventHandler(this.menuAyudaPasos_Click);
+        menuAyudaPasos.Name = "menuAyudaPasos";
+        menuAyudaPasos.Size = new Size(251, 34);
+        menuAyudaPasos.Text = "Guía paso a paso";
+        menuAyudaPasos.Click += menuAyudaPasos_Click;
         // 
         // tableLayoutPanel1
         // 
-        this.tableLayoutPanel1.ColumnCount = 1;
-        this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-        this.tableLayoutPanel1.Controls.Add(this.grpConfiguracion, 0, 0);
-        this.tableLayoutPanel1.Controls.Add(this.grpLog, 0, 1);
-        this.tableLayoutPanel1.Controls.Add(this.progressBar1, 0, 2);
-        this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.tableLayoutPanel1.Location = new System.Drawing.Point(10, 38);
-        this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-        this.tableLayoutPanel1.RowCount = 3;
-        this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 230F));
-        this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-        this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-        this.tableLayoutPanel1.Size = new System.Drawing.Size(980, 592);
-        this.tableLayoutPanel1.TabIndex = 1;
+        tableLayoutPanel1.ColumnCount = 1;
+        tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        tableLayoutPanel1.Controls.Add(grpConfiguracion, 0, 0);
+        tableLayoutPanel1.Controls.Add(grpLog, 0, 1);
+        tableLayoutPanel1.Controls.Add(progressBar1, 0, 2);
+        tableLayoutPanel1.Dock = DockStyle.Fill;
+        tableLayoutPanel1.Location = new Point(10, 43);
+        tableLayoutPanel1.Name = "tableLayoutPanel1";
+        tableLayoutPanel1.RowCount = 3;
+        tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 230F));
+        tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+        tableLayoutPanel1.Size = new Size(980, 675);
+        tableLayoutPanel1.TabIndex = 1;
         // 
         // grpConfiguracion
         // 
-        this.grpConfiguracion.Controls.Add(this.tableLayoutPanel2);
-        this.grpConfiguracion.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.grpConfiguracion.Location = new System.Drawing.Point(3, 3);
-        this.grpConfiguracion.Name = "grpConfiguracion";
-        this.grpConfiguracion.Padding = new System.Windows.Forms.Padding(10);
-        this.grpConfiguracion.Size = new System.Drawing.Size(974, 184);
-        this.grpConfiguracion.TabIndex = 0;
-        this.grpConfiguracion.TabStop = false;
-        this.grpConfiguracion.Text = "Configuración";
+        grpConfiguracion.Controls.Add(tableLayoutPanel2);
+        grpConfiguracion.Dock = DockStyle.Fill;
+        grpConfiguracion.Location = new Point(3, 3);
+        grpConfiguracion.Name = "grpConfiguracion";
+        grpConfiguracion.Padding = new Padding(10);
+        grpConfiguracion.Size = new Size(974, 224);
+        grpConfiguracion.TabIndex = 0;
+        grpConfiguracion.TabStop = false;
+        grpConfiguracion.Text = "Configuración";
         // 
         // tableLayoutPanel2
         // 
-        this.tableLayoutPanel2.ColumnCount = 3;
-        this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
-        this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-        this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 140F));
-        this.tableLayoutPanel2.Controls.Add(this.lblRutaProyecto, 0, 0);
-        this.tableLayoutPanel2.Controls.Add(this.txtRutaProyecto, 1, 0);
-        this.tableLayoutPanel2.Controls.Add(this.btnSeleccionarRutaProyecto, 2, 0);
-        this.tableLayoutPanel2.Controls.Add(this.lblVersion, 0, 1);
-        this.tableLayoutPanel2.Controls.Add(this.txtVersion, 1, 1);
-        this.tableLayoutPanel2.Controls.Add(this.chkLimpiarPublish, 2, 1);
-        this.tableLayoutPanel2.Controls.Add(this.lblRutaIscc, 0, 2);
-        this.tableLayoutPanel2.Controls.Add(this.txtRutaIscc, 1, 2);
-        this.tableLayoutPanel2.Controls.Add(this.btnBuscarIscc, 2, 2);
-        this.tableLayoutPanel2.Controls.Add(this.pnlAcciones, 0, 3);
-        this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.tableLayoutPanel2.Location = new System.Drawing.Point(10, 30);
-        this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-        this.tableLayoutPanel2.RowCount = 4;
-        this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
-        this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
-        this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
-        this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-        this.tableLayoutPanel2.Size = new System.Drawing.Size(954, 144);
-        this.tableLayoutPanel2.TabIndex = 0;
-        // 
-        // lblRutaProyecto
-        // 
-        this.lblRutaProyecto.AutoSize = true;
-        this.lblRutaProyecto.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.lblRutaProyecto.Location = new System.Drawing.Point(3, 0);
-        this.lblRutaProyecto.Name = "lblRutaProyecto";
-        this.lblRutaProyecto.Size = new System.Drawing.Size(114, 34);
-        this.lblRutaProyecto.TabIndex = 0;
-        this.lblRutaProyecto.Text = "Ruta proyecto";
-        this.lblRutaProyecto.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+        tableLayoutPanel2.ColumnCount = 3;
+        tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130F));
+        tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 168F));
+        tableLayoutPanel2.Controls.Add(txtRutaProyecto, 1, 0);
+        tableLayoutPanel2.Controls.Add(btnSeleccionarRutaProyecto, 2, 0);
+        tableLayoutPanel2.Controls.Add(txtVersion, 1, 1);
+        tableLayoutPanel2.Controls.Add(chkLimpiarPublish, 2, 1);
+        tableLayoutPanel2.Controls.Add(lblRutaIscc, 0, 2);
+        tableLayoutPanel2.Controls.Add(txtRutaIscc, 1, 2);
+        tableLayoutPanel2.Controls.Add(btnBuscarIscc, 2, 2);
+        tableLayoutPanel2.Controls.Add(pnlAcciones, 0, 3);
+        tableLayoutPanel2.Controls.Add(lblVersion, 0, 1);
+        tableLayoutPanel2.Controls.Add(lblRutaProyecto, 0, 0);
+        tableLayoutPanel2.Dock = DockStyle.Fill;
+        tableLayoutPanel2.Location = new Point(10, 34);
+        tableLayoutPanel2.Name = "tableLayoutPanel2";
+        tableLayoutPanel2.RowCount = 4;
+        tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
+        tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 37F));
+        tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
+        tableLayoutPanel2.Size = new Size(954, 180);
+        tableLayoutPanel2.TabIndex = 0;
         // 
         // txtRutaProyecto
         // 
-        this.txtRutaProyecto.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.txtRutaProyecto.Location = new System.Drawing.Point(123, 3);
-        this.txtRutaProyecto.Name = "txtRutaProyecto";
-        this.txtRutaProyecto.Size = new System.Drawing.Size(688, 27);
-        this.txtRutaProyecto.TabIndex = 1;
+        txtRutaProyecto.Dock = DockStyle.Fill;
+        txtRutaProyecto.Location = new Point(133, 3);
+        txtRutaProyecto.Name = "txtRutaProyecto";
+        txtRutaProyecto.Size = new Size(650, 31);
+        txtRutaProyecto.TabIndex = 1;
         // 
         // btnSeleccionarRutaProyecto
         // 
-        this.btnSeleccionarRutaProyecto.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.btnSeleccionarRutaProyecto.Location = new System.Drawing.Point(817, 3);
-        this.btnSeleccionarRutaProyecto.Name = "btnSeleccionarRutaProyecto";
-        this.btnSeleccionarRutaProyecto.Size = new System.Drawing.Size(134, 28);
-        this.btnSeleccionarRutaProyecto.TabIndex = 2;
-        this.btnSeleccionarRutaProyecto.Text = "Seleccionar...";
-        this.btnSeleccionarRutaProyecto.UseVisualStyleBackColor = true;
-        this.btnSeleccionarRutaProyecto.Click += new System.EventHandler(this.btnSeleccionarRutaProyecto_Click);
-        // 
-        // lblVersion
-        // 
-        this.lblVersion.AutoSize = true;
-        this.lblVersion.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.lblVersion.Location = new System.Drawing.Point(3, 34);
-        this.lblVersion.Name = "lblVersion";
-        this.lblVersion.Size = new System.Drawing.Size(114, 34);
-        this.lblVersion.TabIndex = 3;
-        this.lblVersion.Text = "Versión";
-        this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+        btnSeleccionarRutaProyecto.Anchor = AnchorStyles.None;
+        btnSeleccionarRutaProyecto.Location = new Point(800, 3);
+        btnSeleccionarRutaProyecto.Name = "btnSeleccionarRutaProyecto";
+        btnSeleccionarRutaProyecto.Size = new Size(139, 29);
+        btnSeleccionarRutaProyecto.TabIndex = 2;
+        btnSeleccionarRutaProyecto.Text = "Seleccionar...";
+        btnSeleccionarRutaProyecto.UseVisualStyleBackColor = true;
+        btnSeleccionarRutaProyecto.Click += btnSeleccionarRutaProyecto_Click;
         // 
         // txtVersion
         // 
-        this.txtVersion.Location = new System.Drawing.Point(123, 37);
-        this.txtVersion.Name = "txtVersion";
-        this.txtVersion.Size = new System.Drawing.Size(180, 27);
-        this.txtVersion.TabIndex = 4;
+        txtVersion.Location = new Point(133, 38);
+        txtVersion.Name = "txtVersion";
+        txtVersion.Size = new Size(180, 31);
+        txtVersion.TabIndex = 4;
         // 
         // chkLimpiarPublish
         // 
-        this.chkLimpiarPublish.AutoSize = true;
-        this.chkLimpiarPublish.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.chkLimpiarPublish.Location = new System.Drawing.Point(817, 37);
-        this.chkLimpiarPublish.Name = "chkLimpiarPublish";
-        this.chkLimpiarPublish.Size = new System.Drawing.Size(134, 28);
-        this.chkLimpiarPublish.TabIndex = 5;
-        this.chkLimpiarPublish.Text = "Limpiar publish";
-        this.chkLimpiarPublish.UseVisualStyleBackColor = true;
+        chkLimpiarPublish.AutoSize = true;
+        chkLimpiarPublish.Dock = DockStyle.Fill;
+        chkLimpiarPublish.Location = new Point(789, 38);
+        chkLimpiarPublish.Name = "chkLimpiarPublish";
+        chkLimpiarPublish.Size = new Size(162, 31);
+        chkLimpiarPublish.TabIndex = 5;
+        chkLimpiarPublish.Text = "Limpiar publish";
+        chkLimpiarPublish.UseVisualStyleBackColor = true;
         // 
         // lblRutaIscc
         // 
-        this.lblRutaIscc.AutoSize = true;
-        this.lblRutaIscc.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.lblRutaIscc.Location = new System.Drawing.Point(3, 68);
-        this.lblRutaIscc.Name = "lblRutaIscc";
-        this.lblRutaIscc.Size = new System.Drawing.Size(114, 34);
-        this.lblRutaIscc.TabIndex = 6;
-        this.lblRutaIscc.Text = "ISCC.exe";
-        this.lblRutaIscc.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+        lblRutaIscc.AutoSize = true;
+        lblRutaIscc.Dock = DockStyle.Fill;
+        lblRutaIscc.Location = new Point(3, 72);
+        lblRutaIscc.Name = "lblRutaIscc";
+        lblRutaIscc.Size = new Size(124, 34);
+        lblRutaIscc.TabIndex = 6;
+        lblRutaIscc.Text = "ISCC.exe";
+        lblRutaIscc.TextAlign = ContentAlignment.MiddleLeft;
         // 
         // txtRutaIscc
         // 
-        this.txtRutaIscc.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.txtRutaIscc.Location = new System.Drawing.Point(123, 71);
-        this.txtRutaIscc.Name = "txtRutaIscc";
-        this.txtRutaIscc.Size = new System.Drawing.Size(688, 27);
-        this.txtRutaIscc.TabIndex = 7;
+        txtRutaIscc.Dock = DockStyle.Fill;
+        txtRutaIscc.Location = new Point(133, 75);
+        txtRutaIscc.Name = "txtRutaIscc";
+        txtRutaIscc.Size = new Size(650, 31);
+        txtRutaIscc.TabIndex = 7;
         // 
         // btnBuscarIscc
         // 
-        this.btnBuscarIscc.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.btnBuscarIscc.Location = new System.Drawing.Point(817, 71);
-        this.btnBuscarIscc.Name = "btnBuscarIscc";
-        this.btnBuscarIscc.Size = new System.Drawing.Size(134, 28);
-        this.btnBuscarIscc.TabIndex = 8;
-        this.btnBuscarIscc.Text = "Buscar...";
-        this.btnBuscarIscc.UseVisualStyleBackColor = true;
-        this.btnBuscarIscc.Click += new System.EventHandler(this.btnBuscarIscc_Click);
+        btnBuscarIscc.Dock = DockStyle.Fill;
+        btnBuscarIscc.Location = new Point(789, 75);
+        btnBuscarIscc.Name = "btnBuscarIscc";
+        btnBuscarIscc.Size = new Size(162, 28);
+        btnBuscarIscc.TabIndex = 8;
+        btnBuscarIscc.Text = "Buscar...";
+        btnBuscarIscc.UseVisualStyleBackColor = true;
+        btnBuscarIscc.Click += btnBuscarIscc_Click;
         // 
         // pnlAcciones
         // 
-        this.tableLayoutPanel2.SetColumnSpan(this.pnlAcciones, 3);
-        this.pnlAcciones.Controls.Add(this.btnLimpiarPublish);
-        this.pnlAcciones.Controls.Add(this.btnBuild);
-        this.pnlAcciones.Controls.Add(this.btnPublish);
-        this.pnlAcciones.Controls.Add(this.btnCopiarRecursos);
-        this.pnlAcciones.Controls.Add(this.btnInstalador);
-        this.pnlAcciones.Controls.Add(this.btnZipPortable);
-        this.pnlAcciones.Controls.Add(this.btnZipSingleFile);
-        this.pnlAcciones.Controls.Add(this.btnVerificarRecursos);
-        this.pnlAcciones.Controls.Add(this.btnFallbackLimpieza);
-        this.pnlAcciones.Controls.Add(this.btnEjecutarTodo);
-        this.pnlAcciones.Controls.Add(this.btnCancelar);
-        this.pnlAcciones.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.pnlAcciones.Location = new System.Drawing.Point(3, 105);
-        this.pnlAcciones.Name = "pnlAcciones";
-        this.pnlAcciones.Size = new System.Drawing.Size(948, 36);
-        this.pnlAcciones.TabIndex = 9;
+        tableLayoutPanel2.SetColumnSpan(pnlAcciones, 3);
+        pnlAcciones.Controls.Add(btnLimpiarPublish);
+        pnlAcciones.Controls.Add(btnBuild);
+        pnlAcciones.Controls.Add(btnPublish);
+        pnlAcciones.Controls.Add(btnCopiarRecursos);
+        pnlAcciones.Controls.Add(btnInstalador);
+        pnlAcciones.Controls.Add(btnZipPortable);
+        pnlAcciones.Controls.Add(btnZipSingleFile);
+        pnlAcciones.Controls.Add(btnVerificarRecursos);
+        pnlAcciones.Controls.Add(btnFallbackLimpieza);
+        pnlAcciones.Controls.Add(btnEjecutarTodo);
+        pnlAcciones.Controls.Add(btnCancelar);
+        pnlAcciones.AutoScroll = true;
+        pnlAcciones.BorderStyle = BorderStyle.FixedSingle;
+        pnlAcciones.Dock = DockStyle.Fill;
+        pnlAcciones.Location = new Point(3, 109);
+        pnlAcciones.Name = "pnlAcciones";
+        pnlAcciones.Size = new Size(948, 68);
+        pnlAcciones.TabIndex = 9;
         // 
         // btnLimpiarPublish
         // 
-        this.btnLimpiarPublish.Location = new System.Drawing.Point(3, 3);
-        this.btnLimpiarPublish.Name = "btnLimpiarPublish";
-        this.btnLimpiarPublish.Size = new System.Drawing.Size(120, 29);
-        this.btnLimpiarPublish.TabIndex = 0;
-        this.btnLimpiarPublish.Text = "Limpiar publish";
-        this.btnLimpiarPublish.UseVisualStyleBackColor = true;
-        this.btnLimpiarPublish.Click += new System.EventHandler(this.btnLimpiarPublish_Click);
+        btnLimpiarPublish.Location = new Point(3, 3);
+        btnLimpiarPublish.Name = "btnLimpiarPublish";
+        btnLimpiarPublish.Size = new Size(155, 33);
+        btnLimpiarPublish.TabIndex = 0;
+        btnLimpiarPublish.Text = "Limpiar publish";
+        btnLimpiarPublish.UseVisualStyleBackColor = true;
+        btnLimpiarPublish.Click += btnLimpiarPublish_Click;
         // 
         // btnBuild
         // 
-        this.btnBuild.Location = new System.Drawing.Point(129, 3);
-        this.btnBuild.Name = "btnBuild";
-        this.btnBuild.Size = new System.Drawing.Size(90, 29);
-        this.btnBuild.TabIndex = 1;
-        this.btnBuild.Text = "Build";
-        this.btnBuild.UseVisualStyleBackColor = true;
-        this.btnBuild.Click += new System.EventHandler(this.btnBuild_Click);
+        btnBuild.Location = new Point(164, 3);
+        btnBuild.Name = "btnBuild";
+        btnBuild.Size = new Size(90, 33);
+        btnBuild.TabIndex = 1;
+        btnBuild.Text = "Build";
+        btnBuild.UseVisualStyleBackColor = true;
+        btnBuild.Click += btnBuild_Click;
         // 
         // btnPublish
         // 
-        this.btnPublish.Location = new System.Drawing.Point(225, 3);
-        this.btnPublish.Name = "btnPublish";
-        this.btnPublish.Size = new System.Drawing.Size(90, 29);
-        this.btnPublish.TabIndex = 2;
-        this.btnPublish.Text = "Publish";
-        this.btnPublish.UseVisualStyleBackColor = true;
-        this.btnPublish.Click += new System.EventHandler(this.btnPublish_Click);
+        btnPublish.Location = new Point(260, 3);
+        btnPublish.Name = "btnPublish";
+        btnPublish.Size = new Size(90, 33);
+        btnPublish.TabIndex = 2;
+        btnPublish.Text = "Publish";
+        btnPublish.UseVisualStyleBackColor = true;
+        btnPublish.Click += btnPublish_Click;
         // 
         // btnCopiarRecursos
         // 
-        this.btnCopiarRecursos.Location = new System.Drawing.Point(321, 3);
-        this.btnCopiarRecursos.Name = "btnCopiarRecursos";
-        this.btnCopiarRecursos.Size = new System.Drawing.Size(130, 29);
-        this.btnCopiarRecursos.TabIndex = 3;
-        this.btnCopiarRecursos.Text = "Copiar recursos";
-        this.btnCopiarRecursos.UseVisualStyleBackColor = true;
-        this.btnCopiarRecursos.Click += new System.EventHandler(this.btnCopiarRecursos_Click);
-        // 
-        // btnZipPortable
-        // 
-        this.btnZipPortable.Location = new System.Drawing.Point(457, 3);
-        this.btnZipPortable.Name = "btnZipPortable";
-        this.btnZipPortable.Size = new System.Drawing.Size(110, 29);
-        this.btnZipPortable.TabIndex = 4;
-        this.btnZipPortable.Text = "ZIP portable";
-        this.btnZipPortable.UseVisualStyleBackColor = true;
-        this.btnZipPortable.Click += new System.EventHandler(this.btnZipPortable_Click);
-        // 
-        // btnZipSingleFile
-        // 
-        this.btnZipSingleFile.Location = new System.Drawing.Point(573, 3);
-        this.btnZipSingleFile.Name = "btnZipSingleFile";
-        this.btnZipSingleFile.Size = new System.Drawing.Size(122, 29);
-        this.btnZipSingleFile.TabIndex = 5;
-        this.btnZipSingleFile.Text = "ZIP single-file";
-        this.btnZipSingleFile.UseVisualStyleBackColor = true;
-        this.btnZipSingleFile.Click += new System.EventHandler(this.btnZipSingleFile_Click);
+        btnCopiarRecursos.Location = new Point(356, 3);
+        btnCopiarRecursos.Name = "btnCopiarRecursos";
+        btnCopiarRecursos.Size = new Size(147, 33);
+        btnCopiarRecursos.TabIndex = 3;
+        btnCopiarRecursos.Text = "Copiar recursos";
+        btnCopiarRecursos.UseVisualStyleBackColor = true;
+        btnCopiarRecursos.Click += btnCopiarRecursos_Click;
         // 
         // btnInstalador
         // 
-        this.btnInstalador.Location = new System.Drawing.Point(701, 3);
-        this.btnInstalador.Name = "btnInstalador";
-        this.btnInstalador.Size = new System.Drawing.Size(90, 29);
-        this.btnInstalador.TabIndex = 6;
-        this.btnInstalador.Text = "Instalador";
-        this.btnInstalador.UseVisualStyleBackColor = true;
-        this.btnInstalador.Click += new System.EventHandler(this.btnInstalador_Click);
+        btnInstalador.Location = new Point(509, 3);
+        btnInstalador.Name = "btnInstalador";
+        btnInstalador.Size = new Size(101, 33);
+        btnInstalador.TabIndex = 6;
+        btnInstalador.Text = "Instalador";
+        btnInstalador.UseVisualStyleBackColor = true;
+        btnInstalador.Click += btnInstalador_Click;
+        // 
+        // btnZipPortable
+        // 
+        btnZipPortable.Location = new Point(616, 3);
+        btnZipPortable.Name = "btnZipPortable";
+        btnZipPortable.Size = new Size(121, 33);
+        btnZipPortable.TabIndex = 4;
+        btnZipPortable.Text = "ZIP portable";
+        btnZipPortable.UseVisualStyleBackColor = true;
+        btnZipPortable.Click += btnZipPortable_Click;
+        // 
+        // btnZipSingleFile
+        // 
+        btnZipSingleFile.Location = new Point(743, 3);
+        btnZipSingleFile.Name = "btnZipSingleFile";
+        btnZipSingleFile.Size = new Size(132, 33);
+        btnZipSingleFile.TabIndex = 5;
+        btnZipSingleFile.Text = "ZIP single-file";
+        btnZipSingleFile.UseVisualStyleBackColor = true;
+        btnZipSingleFile.Click += btnZipSingleFile_Click;
         // 
         // btnVerificarRecursos
         // 
-        this.btnVerificarRecursos.Location = new System.Drawing.Point(1041, 3);
-        this.btnVerificarRecursos.Name = "btnVerificarRecursos";
-        this.btnVerificarRecursos.Size = new System.Drawing.Size(145, 29);
-        this.btnVerificarRecursos.TabIndex = 9;
-        this.btnVerificarRecursos.Text = "Verificar recursos";
-        this.btnVerificarRecursos.UseVisualStyleBackColor = true;
-        this.btnVerificarRecursos.Click += new System.EventHandler(this.btnVerificarRecursos_Click);
+        btnVerificarRecursos.Location = new Point(3, 36);
+        btnVerificarRecursos.Name = "btnVerificarRecursos";
+        btnVerificarRecursos.Size = new Size(155, 33);
+        btnVerificarRecursos.TabIndex = 9;
+        btnVerificarRecursos.Text = "Verificar recursos";
+        btnVerificarRecursos.UseVisualStyleBackColor = true;
+        btnVerificarRecursos.Click += btnVerificarRecursos_Click;
         // 
         // btnFallbackLimpieza
         // 
-        this.btnFallbackLimpieza.Location = new System.Drawing.Point(1192, 3);
-        this.btnFallbackLimpieza.Name = "btnFallbackLimpieza";
-        this.btnFallbackLimpieza.Size = new System.Drawing.Size(155, 29);
-        this.btnFallbackLimpieza.TabIndex = 10;
-        this.btnFallbackLimpieza.Text = "Fallback limpieza";
-        this.btnFallbackLimpieza.UseVisualStyleBackColor = true;
-        this.btnFallbackLimpieza.Click += new System.EventHandler(this.btnFallbackLimpieza_Click);
+        btnFallbackLimpieza.Location = new Point(175, 34);
+        btnFallbackLimpieza.Name = "btnFallbackLimpieza";
+        btnFallbackLimpieza.Size = new Size(155, 33);
+        btnFallbackLimpieza.TabIndex = 10;
+        btnFallbackLimpieza.Text = "Fallback limpieza";
+        btnFallbackLimpieza.UseVisualStyleBackColor = true;
+        btnFallbackLimpieza.Click += btnFallbackLimpieza_Click;
         // 
         // btnEjecutarTodo
         // 
-        this.btnEjecutarTodo.Location = new System.Drawing.Point(1353, 3);
-        this.btnEjecutarTodo.Name = "btnEjecutarTodo";
-        this.btnEjecutarTodo.Size = new System.Drawing.Size(120, 29);
-        this.btnEjecutarTodo.TabIndex = 11;
-        this.btnEjecutarTodo.Text = "Ejecutar todo";
-        this.btnEjecutarTodo.UseVisualStyleBackColor = true;
-        this.btnEjecutarTodo.Click += new System.EventHandler(this.btnEjecutarTodo_Click);
+        btnEjecutarTodo.Location = new Point(356, 35);
+        btnEjecutarTodo.Name = "btnEjecutarTodo";
+        btnEjecutarTodo.Size = new Size(127, 33);
+        btnEjecutarTodo.TabIndex = 11;
+        btnEjecutarTodo.Text = "Ejecutar todo";
+        btnEjecutarTodo.UseVisualStyleBackColor = true;
+        btnEjecutarTodo.Click += btnEjecutarTodo_Click;
         // 
         // btnCancelar
         // 
-        this.btnCancelar.Enabled = false;
-        this.btnCancelar.Location = new System.Drawing.Point(1479, 3);
-        this.btnCancelar.Name = "btnCancelar";
-        this.btnCancelar.Size = new System.Drawing.Size(90, 29);
-        this.btnCancelar.TabIndex = 12;
-        this.btnCancelar.Text = "Cancelar";
-        this.btnCancelar.UseVisualStyleBackColor = true;
-        this.btnCancelar.Click += new System.EventHandler(this.btnCancelar_Click);
+        btnCancelar.BackColor = Color.Blue;
+        btnCancelar.Enabled = false;
+        btnCancelar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+        btnCancelar.ForeColor = Color.White;
+        btnCancelar.Location = new Point(790, 36);
+        btnCancelar.Name = "btnCancelar";
+        btnCancelar.Size = new Size(155, 33);
+        btnCancelar.TabIndex = 12;
+        btnCancelar.Text = "Cancelar";
+        btnCancelar.UseVisualStyleBackColor = false;
+        btnCancelar.Click += btnCancelar_Click;
+        // 
+        // lblVersion
+        // 
+        lblVersion.AutoSize = true;
+        lblVersion.Dock = DockStyle.Fill;
+        lblVersion.Location = new Point(3, 35);
+        lblVersion.Name = "lblVersion";
+        lblVersion.Size = new Size(124, 37);
+        lblVersion.TabIndex = 3;
+        lblVersion.Text = "Versión";
+        lblVersion.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // lblRutaProyecto
+        // 
+        lblRutaProyecto.AutoSize = true;
+        lblRutaProyecto.Dock = DockStyle.Fill;
+        lblRutaProyecto.Location = new Point(3, 0);
+        lblRutaProyecto.Name = "lblRutaProyecto";
+        lblRutaProyecto.Size = new Size(124, 35);
+        lblRutaProyecto.TabIndex = 0;
+        lblRutaProyecto.Text = "Ruta proyecto";
+        lblRutaProyecto.TextAlign = ContentAlignment.MiddleLeft;
         // 
         // grpLog
         // 
-        this.grpLog.Controls.Add(this.txtLog);
-        this.grpLog.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.grpLog.Location = new System.Drawing.Point(3, 193);
-        this.grpLog.Name = "grpLog";
-        this.grpLog.Padding = new System.Windows.Forms.Padding(10);
-        this.grpLog.Size = new System.Drawing.Size(974, 398);
-        this.grpLog.TabIndex = 1;
-        this.grpLog.TabStop = false;
-        this.grpLog.Text = "Log";
+        grpLog.Controls.Add(txtLog);
+        grpLog.Dock = DockStyle.Fill;
+        grpLog.Location = new Point(3, 233);
+        grpLog.Name = "grpLog";
+        grpLog.Padding = new Padding(10);
+        grpLog.Size = new Size(974, 413);
+        grpLog.TabIndex = 1;
+        grpLog.TabStop = false;
+        grpLog.Text = "Log";
         // 
         // txtLog
         // 
-        this.txtLog.BackColor = System.Drawing.Color.Black;
-        this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.txtLog.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-        this.txtLog.ForeColor = System.Drawing.Color.Gainsboro;
-        this.txtLog.Location = new System.Drawing.Point(10, 30);
-        this.txtLog.Name = "txtLog";
-        this.txtLog.ReadOnly = true;
-        this.txtLog.Size = new System.Drawing.Size(954, 358);
-        this.txtLog.TabIndex = 0;
-        this.txtLog.Text = "";
+        txtLog.BackColor = Color.Black;
+        txtLog.Dock = DockStyle.Fill;
+        txtLog.Font = new Font("Consolas", 9F);
+        txtLog.ForeColor = Color.Gainsboro;
+        txtLog.Location = new Point(10, 34);
+        txtLog.Name = "txtLog";
+        txtLog.ReadOnly = true;
+        txtLog.Size = new Size(954, 369);
+        txtLog.TabIndex = 0;
+        txtLog.Text = "";
         // 
         // progressBar1
         // 
-        this.progressBar1.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.progressBar1.Location = new System.Drawing.Point(3, 597);
-        this.progressBar1.Name = "progressBar1";
-        this.progressBar1.Size = new System.Drawing.Size(974, 20);
-        this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Blocks;
-        this.progressBar1.TabIndex = 2;
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(1000, 640);
-        this.Controls.Add(this.tableLayoutPanel1);
-        this.Controls.Add(this.menuStrip1);
-        this.MainMenuStrip = this.menuStrip1;
-        this.MinimumSize = new System.Drawing.Size(900, 600);
-        this.Name = "Form1";
-        this.Padding = new System.Windows.Forms.Padding(10);
-        this.Text = "IgameTools - Publicación (Publish/ZIP/Instalador)";
-        this.Load += new System.EventHandler(this.Form1_Load);
-        this.menuStrip1.ResumeLayout(false);
-        this.menuStrip1.PerformLayout();
-        this.tableLayoutPanel1.ResumeLayout(false);
-        this.grpConfiguracion.ResumeLayout(false);
-        this.tableLayoutPanel2.ResumeLayout(false);
-        this.tableLayoutPanel2.PerformLayout();
-        this.pnlAcciones.ResumeLayout(false);
-        this.grpLog.ResumeLayout(false);
-        this.ResumeLayout(false);
-        this.PerformLayout();
+        progressBar1.Dock = DockStyle.Fill;
+        progressBar1.Location = new Point(3, 652);
+        progressBar1.Name = "progressBar1";
+        progressBar1.Size = new Size(974, 20);
+        progressBar1.TabIndex = 2;
+        // 
+        // Form1
+        // 
+        AutoScaleDimensions = new SizeF(10F, 25F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(1000, 728);
+        Controls.Add(tableLayoutPanel1);
+        Controls.Add(menuStrip1);
+        MainMenuStrip = menuStrip1;
+        MinimumSize = new Size(900, 600);
+        Name = "Form1";
+        Padding = new Padding(10);
+        Text = "IgameTools - Publicación (Publish/ZIP/Instalador)";
+        Load += Form1_Load;
+        menuStrip1.ResumeLayout(false);
+        menuStrip1.PerformLayout();
+        tableLayoutPanel1.ResumeLayout(false);
+        grpConfiguracion.ResumeLayout(false);
+        tableLayoutPanel2.ResumeLayout(false);
+        tableLayoutPanel2.PerformLayout();
+        pnlAcciones.ResumeLayout(false);
+        grpLog.ResumeLayout(false);
+        ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion

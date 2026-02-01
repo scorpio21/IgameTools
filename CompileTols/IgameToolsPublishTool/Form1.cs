@@ -29,8 +29,6 @@ public partial class Form1 : Form
         }
 
         pnlAcciones.AutoScroll = true;
-        pnlAcciones.WrapContents = true;
-        pnlAcciones.FlowDirection = FlowDirection.LeftToRight;
 
         _pasoActual = 1;
         ActualizarBotonesPorPaso();
@@ -416,7 +414,7 @@ public partial class Form1 : Form
         btnFallbackLimpieza.Enabled = _pasoActual == 7;
 
         btnCopiarRecursos.Enabled = false;
-        btnEjecutarTodo.Enabled = false;
+        btnEjecutarTodo.Enabled = true;
 
         btnLimpiarPublish.Enabled = _pasoActual <= 2;
     }

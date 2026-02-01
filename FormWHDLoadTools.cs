@@ -481,6 +481,10 @@ namespace IgameToolsWinForms
             chkGameDemo.CheckedChanged += Filter_CheckedChanged;
             chkUnCensored.CheckedChanged += Filter_CheckedChanged;
             chkCensored.CheckedChanged += Filter_CheckedChanged;
+
+            // Misc
+            btnHelp.Click += BtnHelp_Click;
+            btnAbout.Click += BtnAbout_Click;
         }
 
         private void ConfigurarTooltips()
@@ -2709,6 +2713,61 @@ namespace IgameToolsWinForms
         private void btnClear_Click_1(object sender, EventArgs e)
         {
 
+        }
+        private void BtnAbout_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var version = string.IsNullOrWhiteSpace(Application.ProductVersion)
+                    ? "0.2.0"
+                    : Application.ProductVersion.Split('+')[0];
+
+                var aboutText = $"IgameTools WHDLoad Tools v{version}\n\n" +
+                               $"Desarrollado por: Scorpio21\n\n" +
+                               $"Basado en el trabajo original de:\n" +
+                               $"© 2024 Paul Vince (MrV2k)\n" +
+                               $"https://github.com/MrV2K/WHDLoad-Download-Tool\n\n" +
+                               $"Herramienta para descargar y gestionar\n" +
+                               $"paquetes WHDLoad desde FTP/HTTP.";
+
+                MessageBox.Show(aboutText, "Acerca de WHDLoad Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en BtnAbout_Click");
+                MessageBox.Show($"Error al abrir Acerca de: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void BtnHelp_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var helpText = "Guía rápida de WHDLoad Tools\n\n" +
+                              "1. Configurar carpetas:\n" +
+                              "   - Usa 'Folder Settings' para definir dónde guardar Games, Demos, etc.\n\n" +
+                              "2. Cargar datos:\n" +
+                              "   - Pulsa 'Load Data' para leer los archivos .dat y mostrar la lista.\n\n" +
+                              "3. Filtrar (opcional):\n" +
+                              "   - Usa los paneles de filtros para reducir la lista (idioma, sistema, chipset...).\n\n" +
+                              "4. Descargar:\n" +
+                              "   - Selecciona elementos en la lista y pulsa 'Download'.\n" +
+                              "   - Elige FTP o HTTP según prefieras.\n\n" +
+                              "5. Crear carpetas:\n" +
+                              "   - Tras descargar, usa 'Make Folder' para organizar los archivos.\n\n" +
+                              "6. Listas:\n" +
+                              "   - Puedes guardar/cargar listas de descargas con 'Lists'.\n\n" +
+                              "7. Preferencias:\n" +
+                              "   - Guarda/carga la configuración con 'Save Prefs' / 'Load Prefs'.\n\n" +
+                              "Para más detalles, consulta el README del proyecto.";
+
+                MessageBox.Show(helpText, "Ayuda de WHDLoad Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en BtnHelp_Click");
+                MessageBox.Show($"Error al abrir Ayuda: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
